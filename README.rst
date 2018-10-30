@@ -1,7 +1,12 @@
 ZUGFeRD invoices for pretix
 ==========================
 
-This is a plugin for `pretix`_. 
+This is a plugin for `pretix`_. It allows you to attach ZUGFeRD information to your invoices.
+
+**PLEASE NOTE:** Use this plugin at your own risk. If there is a semantic difference between the XML and PDF contents in
+your ZUGFeRD invoices, you might legally owe the VAT to the financial authorities **twice**, since you then generated two
+invoices. We tried our best to avoid this, but we do not assume any liability. Please check the output of this plugin
+with your tax or legal attorney before use.
 
 Development setup
 -----------------
