@@ -1,12 +1,6 @@
 from collections import defaultdict
 
-import hashlib
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from PyPDF2.generic import createStringObject, DictionaryObject, NameObject, DecodedStreamObject, ArrayObject
-from django.utils.timezone import now
-from io import BytesIO
-from lxml import etree
-
+import bleach
 from decimal import Decimal
 
 from django.utils.functional import lazy
@@ -151,8 +145,9 @@ class ZugferdMixin:
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.applicable_percent = line.tax_rate
             li.settlement.monetary_summation.total_amount = (line.net_value * factor, cc)
-            li.product.name = line.description
-            li.product.description = line.description
+            desc = bleach.clean(line.description.replace("<br />", "\n"), tags=[])
+            li.product.name = desc.split("\n")[0]
+            li.product.description = desc
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category] += line.tax_value
             grossvalue_map[line.tax_rate, category] += line.gross_value
@@ -180,7 +175,7 @@ class ZugferdMixin:
         doc.trade.settlement.monetary_summation.tax_basis_total = (total - taxtotal, cc)
         doc.trade.settlement.monetary_summation.tax_total = (taxtotal, cc)
         doc.trade.settlement.monetary_summation.grand_total = (total, cc)
-        doc.trade.settlement.monetary_summation.payable_amount = (total, cc)
+        doc.trade.settlement.monetary_summation.due_amount = (total, cc)
 
         return doc
 
