@@ -23,7 +23,7 @@ class ZugferdMixin:
         doc = Document()
         doc.context.guideline_parameter.id = "urn:ferd:CrossIndustryDocument:invoice:1p0:extended"
         doc.context.test_indicator = (invoice.invoice_no == "PREVIEW")
-        doc.header.id = invoice.full_invoice_no
+        doc.header.id = invoice.number
         doc.header.name = "RECHNUNG"
         doc.header.type_code = "380"
         doc.header.issue_date_time = invoice.date
@@ -120,7 +120,7 @@ class ZugferdMixin:
             ref = AdditionalReferencedDocument()
             ref.issue_date_time = invoice.refers.date
             ref.type_code = "AWR"
-            ref.id = invoice.refers.full_invoice_no
+            ref.id = invoice.refers.number
 
         taxvalue_map = defaultdict(Decimal)
         grossvalue_map = defaultdict(Decimal)
