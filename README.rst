@@ -8,6 +8,16 @@ your ZUGFeRD invoices, you might legally owe the VAT to the financial authoritie
 invoices. We tried our best to avoid this, but we do not assume any liability. Please check the output of this plugin
 with your tax or legal attorney before use.
 
+Installation note
+-----------------
+
+This plugin requires ``ghostscript`` to be installed. If you have it installed in a nonstandard location, you can
+specify it in your ``pretix.cfg``::
+
+    [tools]
+    gs=/usr/local/bin/gs
+
+
 Development setup
 -----------------
 

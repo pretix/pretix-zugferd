@@ -1,8 +1,13 @@
 from collections import defaultdict
+import os
+import subprocess
 
 import bleach
 from decimal import Decimal
+import tempfile
+from django.conf import settings
 
+from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
 from django.utils.translation import pgettext, ugettext as _
 from drafthorse.models.document import Document
@@ -186,6 +191,19 @@ class ZugferdMixin:
             return fname, ftype, content
 
         xml = self._zugferd_generate_document(invoice).serialize()
+
+        with tempfile.TemporaryDirectory() as tdir:
+            with open(os.path.join(tdir, 'in.pdf'), 'wb') as f:
+                f.write(content)
+            subprocess.run([settings.CONFIG_FILE.get('tools', 'gs', fallback='gs'),
+                            '-dPDFA=3', '-dBATCH', '-dNOPAUSE', '-dNOOUTERSAVE', '-dUseCIEColor',
+                            '-sFONTPATH={}'.format(os.path.dirname(finders.find('fonts/OpenSans-Regular.ttf'))),
+                            '-sProcessColorModel=DeviceCMYK', '-sDEVICE=pdfwrite', '-sPDFACompatibilityPolicy=1',
+                            '-sOutputFile={}'.format(os.path.join(tdir, 'out.pdf')),
+                            os.path.join(tdir, 'in.pdf')], check=True)
+            with open(os.path.join(tdir, 'out.pdf'), 'rb') as f:
+                content = f.read()
+
         content = attach_xml(content, xml, 'EXTENDED')
         return fname, ftype, content
 
