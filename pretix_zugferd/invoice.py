@@ -9,17 +9,23 @@ from django.conf import settings
 
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
+from django.utils.timezone import now
 from django.utils.translation import pgettext, ugettext as _
-from drafthorse.models.document import Document
-from drafthorse.models.tradelines import LineItem
-from drafthorse.models.party import TaxRegistration
 from drafthorse.models.accounting import ApplicableTradeTax
-from drafthorse.models.references import AdditionalReferencedDocument
+from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
+from drafthorse.models.party import TaxRegistration
 from drafthorse.models.payment import PaymentTerms
+from drafthorse.models.references import AdditionalReferencedDocument
+from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
-
+from lxml import etree
 from pretix.base.invoice import ClassicInvoiceRenderer
+from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2.generic import (
+    ArrayObject, DecodedStreamObject, DictionaryObject, NameObject,
+    createStringObject,
+)
 
 
 class ZugferdMixin:
@@ -84,7 +90,7 @@ class ZugferdMixin:
                         str(invoice.event.name) + ' - ' + invoice.event.get_date_from_display()
                 )
         else:
-            p_str = invoice.event.name
+            p_str = str(invoice.event.name)
         note = IncludedNote()
         note.content.add(p_str)
         doc.header.notes.add(note)

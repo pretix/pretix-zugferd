@@ -1,5 +1,4 @@
 from django.dispatch import receiver
-
 from pretix.base.signals import register_invoice_renderers
 
 
