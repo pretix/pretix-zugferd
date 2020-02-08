@@ -8,10 +8,11 @@ class PluginApp(AppConfig):
     verbose_name = 'ZUGFeRD invoices for pretix'
 
     class PretixPluginMeta:
-        name = ugettext_lazy('ZUGFeRD invoices for pretix')
+        name = ugettext_lazy('ZUGFeRD invoices')
         author = 'Raphael Michel'
         visible = True
         version = '1.0.0'
+        category = 'FEATURE'
 
         @property
         def description(self):
