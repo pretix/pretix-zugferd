@@ -11,7 +11,7 @@ class PluginApp(AppConfig):
         name = ugettext_lazy('ZUGFeRD invoices')
         author = 'Raphael Michel'
         visible = True
-        version = '1.0.1'
+        version = '1.0.2'
         category = 'FEATURE'
 
         @property
