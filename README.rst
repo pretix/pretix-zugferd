@@ -1,5 +1,5 @@
 ZUGFeRD invoices for pretix
-==========================
+===========================
 
 This is a plugin for `pretix`_. It allows you to attach ZUGFeRD information to your invoices.
 
