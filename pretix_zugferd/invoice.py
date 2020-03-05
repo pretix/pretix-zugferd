@@ -1,15 +1,15 @@
-from collections import defaultdict
+import logging
 import os
 import subprocess
+import tempfile
+import unicodedata
+from collections import defaultdict
+from decimal import Decimal
 
 import bleach
-from decimal import Decimal
-import tempfile
 from django.conf import settings
-
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
-from django.utils.timezone import now
 from django.utils.translation import pgettext, ugettext as _
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
@@ -19,13 +19,17 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
-from lxml import etree
+
 from pretix.base.invoice import ClassicInvoiceRenderer
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from PyPDF2.generic import (
-    ArrayObject, DecodedStreamObject, DictionaryObject, NameObject,
-    createStringObject,
-)
+
+
+logger = logging.getLogger(__name__)
+
+
+def remove_control_characters(s):
+    if s is None:
+        return None
+    return "".join(ch for ch in str(s) if unicodedata.category(ch)[0] != "C" or ch == "\n")
 
 
 class ZugferdMixin:
@@ -40,38 +44,39 @@ class ZugferdMixin:
         doc.header.issue_date_time = invoice.date
         doc.header.languages.add(invoice.locale[:2])
 
-        doc.trade.agreement.seller.name = invoice.invoice_from_name
-        lines = invoice.invoice_from.strip().split("\n")
+        doc.trade.agreement.seller.name = remove_control_characters(invoice.invoice_from_name)
+        lines = remove_control_characters(invoice.invoice_from.strip()).split("\n")
         doc.trade.agreement.seller.address.line_one = lines[0].strip()
         if len(lines) > 1:
             doc.trade.agreement.seller.address.line_two = ', '.join(lines[1:]).strip()
-        doc.trade.agreement.seller.address.postcode = invoice.invoice_from_zipcode
-        doc.trade.agreement.seller.address.city_name = invoice.invoice_from_city
-        doc.trade.agreement.seller.address.country_id = str(invoice.invoice_from_country)
+        doc.trade.agreement.seller.address.postcode = remove_control_characters(invoice.invoice_from_zipcode)
+        doc.trade.agreement.seller.address.city_name = remove_control_characters(invoice.invoice_from_city)
+        doc.trade.agreement.seller.address.country_id = str(remove_control_characters(invoice.invoice_from_country))
 
         if invoice.invoice_from_tax_id:
             doc.trade.agreement.seller.tax_registrations.add(
-                TaxRegistration(id=("FC", invoice.invoice_from_tax_id))
+                TaxRegistration(id=("FC", remove_control_characters(invoice.invoice_from_tax_id)))
             )
 
         if invoice.invoice_from_vat_id:
             doc.trade.agreement.seller.tax_registrations.add(
-                TaxRegistration(id=("VA", invoice.invoice_from_vat_id))
+                TaxRegistration(id=("VA", remove_control_characters(invoice.invoice_from_vat_id)))
             )
 
-        doc.trade.agreement.buyer.name = invoice.invoice_to_company or invoice.invoice_to_name
+        doc.trade.agreement.buyer.name = remove_control_characters(invoice.invoice_to_company or
+                                                                   invoice.invoice_to_name)
         if invoice.invoice_to_company and invoice.invoice_to_name:
-            doc.trade.agreement.buyer.address.line_one = invoice.invoice_to_name
-            doc.trade.agreement.buyer.address.line_two = invoice.invoice_to_street
+            doc.trade.agreement.buyer.address.line_one = remove_control_characters(invoice.invoice_to_name)
+            doc.trade.agreement.buyer.address.line_two = remove_control_characters(invoice.invoice_to_street)
         else:
-            doc.trade.agreement.buyer.address.line_one = invoice.invoice_to_street
-        doc.trade.agreement.buyer.address.postcode = invoice.invoice_to_zipcode
-        doc.trade.agreement.buyer.address.city_name = invoice.invoice_to_city
-        doc.trade.agreement.buyer.address.country_id = str(invoice.invoice_to_country)
+            doc.trade.agreement.buyer.address.line_one = remove_control_characters(invoice.invoice_to_street)
+        doc.trade.agreement.buyer.address.postcode = remove_control_characters(invoice.invoice_to_zipcode)
+        doc.trade.agreement.buyer.address.city_name = remove_control_characters(invoice.invoice_to_city)
+        doc.trade.agreement.buyer.address.country_id = remove_control_characters(str(invoice.invoice_to_country))
 
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
-                TaxRegistration(id=("FC", invoice.invoice_to_vat_id))
+                TaxRegistration(id=("FC", remove_control_characters(invoice.invoice_to_vat_id)))
             )
 
         note = IncludedNote()
@@ -80,17 +85,17 @@ class ZugferdMixin:
 
         if not invoice.event.has_subevents:
             if invoice.event.settings.show_date_to and invoice.event.date_to:
-                p_str = (
-                        str(invoice.event.name) + ' - ' + pgettext('invoice', '{from_date}\nuntil {to_date}').format(
+                p_str = remove_control_characters(
+                    str(invoice.event.name) + ' - ' + pgettext('invoice', '{from_date}\nuntil {to_date}').format(
                     from_date=invoice.event.get_date_from_display(),
                     to_date=invoice.event.get_date_to_display())
                 )
             else:
-                p_str = (
-                        str(invoice.event.name) + ' - ' + invoice.event.get_date_from_display()
+                p_str = remove_control_characters(
+                    str(invoice.event.name) + ' - ' + invoice.event.get_date_from_display()
                 )
         else:
-            p_str = str(invoice.event.name)
+            p_str = remove_control_characters(str(invoice.event.name))
         note = IncludedNote()
         note.content.add(p_str)
         doc.header.notes.add(note)
@@ -98,32 +103,34 @@ class ZugferdMixin:
         if invoice.internal_reference:
             note = IncludedNote()
             note.content.add(
-                pgettext('invoice', 'Customer reference: {reference}').format(reference=invoice.internal_reference)
+                pgettext('invoice', 'Customer reference: {reference}').format(
+                    reference=remove_control_characters(invoice.internal_reference)
+                )
             )
             doc.header.notes.add(note)
 
         if invoice.introductory_text:
             note = IncludedNote()
-            note.content.add(invoice.introductory_text)
+            note.content.add(remove_control_characters(invoice.introductory_text))
             doc.header.notes.add(note)
 
         if invoice.additional_text:
             note = IncludedNote()
-            note.content.add(invoice.additional_text)
+            note.content.add(remove_control_characters(invoice.additional_text))
             doc.header.notes.add(note)
 
         if invoice.footer_text:
             note = IncludedNote()
-            note.content.add(invoice.footer_text)
+            note.content.add(remove_control_characters(invoice.footer_text))
             doc.header.notes.add(note)
 
         if invoice.payment_provider_text:
             doc.trade.settlement.payment_means.information.add(
-                invoice.payment_provider_text
+                remove_control_characters(invoice.payment_provider_text)
             )
 
         pt = PaymentTerms()
-        pt.description = invoice.payment_provider_text
+        pt.description = remove_control_characters(invoice.payment_provider_text)
         pt.due_date = invoice.order.expires
         doc.trade.settlement.terms.add(pt)
 
@@ -156,7 +163,7 @@ class ZugferdMixin:
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.applicable_percent = line.tax_rate
             li.settlement.monetary_summation.total_amount = (line.net_value * factor, cc)
-            desc = bleach.clean(line.description.replace("<br />", "\n"), tags=[])
+            desc = remove_control_characters(bleach.clean(line.description.replace("<br />", "\n"), tags=[]))
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
             doc.trade.items.add(li)
@@ -196,7 +203,11 @@ class ZugferdMixin:
         if not invoice.invoice_from_name:
             return fname, ftype, content
 
-        xml = self._zugferd_generate_document(invoice).serialize()
+        try:
+            xml = self._zugferd_generate_document(invoice).serialize()
+        except Exception as e:
+            logger.exception("Could not generate ZUGFeRD data for invoice {}".format(invoice.number))
+            raise e
 
         with tempfile.TemporaryDirectory() as tdir:
             with open(os.path.join(tdir, 'in.pdf'), 'wb') as f:
