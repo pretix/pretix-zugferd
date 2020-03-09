@@ -10,7 +10,7 @@ import bleach
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
-from django.utils.translation import pgettext, ugettext as _
+from django.utils.translation import pgettext, gettext as _
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote

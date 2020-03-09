@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext, ugettext_lazy
+from django.utils.translation import gettext, gettext_lazy
 
 
 class PluginApp(AppConfig):
@@ -8,7 +8,7 @@ class PluginApp(AppConfig):
     verbose_name = 'ZUGFeRD invoices for pretix'
 
     class PretixPluginMeta:
-        name = ugettext_lazy('ZUGFeRD invoices')
+        name = gettext_lazy('ZUGFeRD invoices')
         author = 'Raphael Michel'
         visible = True
         version = '1.0.2'
@@ -16,10 +16,10 @@ class PluginApp(AppConfig):
 
         @property
         def description(self):
-            t = ugettext('This plugin provides an invoice renderer that annotates pretix invoices with ZUGFeRD data, '
+            t = gettext('This plugin provides an invoice renderer that annotates pretix invoices with ZUGFeRD data, '
                          'a structured data format for invoices used in Germany.')
             t += '<div class="alert alert-legal">'
-            t += ugettext(
+            t += gettext(
                 'Note: Use this plugin at your own risk. If there is a semantic difference between the XML and PDF '
                 'contents in your ZUGFeRD invoices, you might legally owe the VAT to the financial authorities twice, '
                 'since you then legally sent two invoices. We tried our best to avoid this, but we do not assume '
