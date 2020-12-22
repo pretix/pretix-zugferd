@@ -24,7 +24,7 @@ cmdclass = {
 
 setup(
     name='pretix-zugferd',
-    version='1.0.3',
+    version='1.0.4',
     description='Invoice renderer that annotates pretix invoices with ZUGFeRD data',
     long_description=long_description,
     url='https://github.com/pretixeu/pretix-zugferd',
