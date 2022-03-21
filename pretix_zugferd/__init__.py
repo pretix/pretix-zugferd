@@ -18,7 +18,7 @@ class PluginApp(AppConfig):
         def description(self):
             t = gettext('This plugin provides an invoice renderer that annotates pretix invoices with ZUGFeRD data, '
                          'a structured data format for invoices used in Germany.')
-            t += '<div class="alert alert-legal">'
+            t += '<div class="text text-warning">'
             t += gettext(
                 'Note: Use this plugin at your own risk. If there is a semantic difference between the XML and PDF '
                 'contents in your ZUGFeRD invoices, you might legally owe the VAT to the financial authorities twice, '
