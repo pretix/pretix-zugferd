@@ -1,3 +1,4 @@
+import bleach
 import logging
 import os
 import subprocess
@@ -5,12 +6,10 @@ import tempfile
 import unicodedata
 from collections import defaultdict
 from decimal import Decimal
-
-import bleach
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
-from django.utils.translation import pgettext, gettext as _
+from django.utils.translation import gettext as _, pgettext
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
@@ -19,9 +18,7 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
-
 from pretix.base.invoice import ClassicInvoiceRenderer
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,54 +26,127 @@ logger = logging.getLogger(__name__)
 def remove_control_characters(s):
     if s is None:
         return None
-    return "".join(ch for ch in str(s) if unicodedata.category(ch)[0] != "C" or ch == "\n")
+    return "".join(
+        ch for ch in str(s) if unicodedata.category(ch)[0] != "C" or ch == "\n"
+    )
 
 
 class ZugferdMixin:
     def _zugferd_generate_document(self, invoice):
         cc = invoice.event.currency
         doc = Document()
-        doc.context.guideline_parameter.id = "urn:ferd:CrossIndustryDocument:invoice:1p0:extended"
-        doc.context.test_indicator = (invoice.invoice_no == "PREVIEW")
+        doc.context.guideline_parameter.id = (
+            "urn:ferd:CrossIndustryDocument:invoice:1p0:extended"
+        )
+        doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
         doc.header.id = invoice.number
         doc.header.name = "RECHNUNG"
         doc.header.type_code = "380"
         doc.header.issue_date_time = invoice.date
         doc.header.languages.add(invoice.locale[:2])
+        # ITEMS
+        taxvalue_map = defaultdict(Decimal)
+        grossvalue_map = defaultdict(Decimal)
+        total = Decimal("0.00")
+        for line in invoice.lines.all():
+            factor = -1 if line.gross_value < 0 else 1
+            li = LineItem()
+            if line.tax_rate == Decimal("0.00"):
+                if invoice.reverse_charge:
+                    category = "AE"
+                else:
+                    category = "E"  # TODO: Always correct?
+            else:
+                category = "S"
+            li.document.line_id = str(line.position + 1)
+            desc = remove_control_characters(
+                bleach.clean(line.description.replace("<br />", "\n"), tags=[])
+            )
+            li.product.name = desc.split("\n")[0]
+            li.product.description = desc
+            li.agreement.gross.amount = (
+                (line.net_value * factor).quantize(Decimal("0.0001")),
+                cc,
+            )
+            li.agreement.gross.basis_quantity = (Decimal("1.0000") * factor, "C62")
+            li.agreement.net.amount = (
+                (line.net_value * factor).quantize(Decimal("0.0001")),
+                cc,
+            )
+            li.agreement.net.basis_quantity = (Decimal("1.0000") * factor, "C62")
+            li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
+            li.settlement.trade_tax.type_code = "VAT"
+            li.settlement.trade_tax.category_code = category
+            li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
+            li.settlement.monetary_summation.total_amount = (
+                line.net_value * factor,
+                cc,
+            )
+            doc.trade.items.add(li)
+            taxvalue_map[line.tax_rate, category] += line.tax_value
+            grossvalue_map[line.tax_rate, category] += line.gross_value
+            total += line.gross_value
 
-        doc.trade.agreement.seller.name = remove_control_characters(invoice.invoice_from_name)
+        doc.trade.agreement.seller.name = remove_control_characters(
+            invoice.invoice_from_name
+        )
         lines = remove_control_characters(invoice.invoice_from.strip()).split("\n")
+        doc.trade.agreement.seller.address.postcode = remove_control_characters(
+            invoice.invoice_from_zipcode
+        )
         doc.trade.agreement.seller.address.line_one = lines[0].strip()
         if len(lines) > 1:
-            doc.trade.agreement.seller.address.line_two = ', '.join(lines[1:]).strip()
-        doc.trade.agreement.seller.address.postcode = remove_control_characters(invoice.invoice_from_zipcode)
-        doc.trade.agreement.seller.address.city_name = remove_control_characters(invoice.invoice_from_city)
-        doc.trade.agreement.seller.address.country_id = str(remove_control_characters(invoice.invoice_from_country))
+            doc.trade.agreement.seller.address.line_two = ", ".join(lines[1:]).strip()
+        doc.trade.agreement.seller.address.city_name = remove_control_characters(
+            invoice.invoice_from_city
+        )
+        doc.trade.agreement.seller.address.country_id = str(
+            remove_control_characters(invoice.invoice_from_country)
+        )
 
         if invoice.invoice_from_tax_id:
             doc.trade.agreement.seller.tax_registrations.add(
-                TaxRegistration(id=("FC", remove_control_characters(invoice.invoice_from_tax_id)))
+                TaxRegistration(
+                    id=("FC", remove_control_characters(invoice.invoice_from_tax_id))
+                )
             )
 
         if invoice.invoice_from_vat_id:
             doc.trade.agreement.seller.tax_registrations.add(
-                TaxRegistration(id=("VA", remove_control_characters(invoice.invoice_from_vat_id)))
+                TaxRegistration(
+                    id=("VA", remove_control_characters(invoice.invoice_from_vat_id))
+                )
             )
 
-        doc.trade.agreement.buyer.name = remove_control_characters(invoice.invoice_to_company or
-                                                                   invoice.invoice_to_name)
+        doc.trade.agreement.buyer.name = remove_control_characters(
+            invoice.invoice_to_company or invoice.invoice_to_name
+        )
+        doc.trade.agreement.buyer.address.postcode = remove_control_characters(
+            invoice.invoice_to_zipcode
+        )
         if invoice.invoice_to_company and invoice.invoice_to_name:
-            doc.trade.agreement.buyer.address.line_one = remove_control_characters(invoice.invoice_to_name)
-            doc.trade.agreement.buyer.address.line_two = remove_control_characters(invoice.invoice_to_street)
+            doc.trade.agreement.buyer.address.line_one = remove_control_characters(
+                invoice.invoice_to_name
+            )
+            doc.trade.agreement.buyer.address.line_two = remove_control_characters(
+                invoice.invoice_to_street
+            )
         else:
-            doc.trade.agreement.buyer.address.line_one = remove_control_characters(invoice.invoice_to_street)
-        doc.trade.agreement.buyer.address.postcode = remove_control_characters(invoice.invoice_to_zipcode)
-        doc.trade.agreement.buyer.address.city_name = remove_control_characters(invoice.invoice_to_city)
-        doc.trade.agreement.buyer.address.country_id = remove_control_characters(str(invoice.invoice_to_country))
+            doc.trade.agreement.buyer.address.line_one = remove_control_characters(
+                invoice.invoice_to_street
+            )
+        doc.trade.agreement.buyer.address.city_name = remove_control_characters(
+            invoice.invoice_to_city
+        )
+        doc.trade.agreement.buyer.address.country_id = remove_control_characters(
+            str(invoice.invoice_to_country)
+        )
 
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
-                TaxRegistration(id=("FC", remove_control_characters(invoice.invoice_to_vat_id)))
+                TaxRegistration(
+                    id=("FC", remove_control_characters(invoice.invoice_to_vat_id))
+                )
             )
 
         note = IncludedNote()
@@ -86,13 +156,18 @@ class ZugferdMixin:
         if not invoice.event.has_subevents:
             if invoice.event.settings.show_date_to and invoice.event.date_to:
                 p_str = remove_control_characters(
-                    str(invoice.event.name) + ' - ' + pgettext('invoice', '{from_date}\nuntil {to_date}').format(
-                    from_date=invoice.event.get_date_from_display(),
-                    to_date=invoice.event.get_date_to_display())
+                    str(invoice.event.name)
+                    + " - "
+                    + pgettext("invoice", "{from_date}\nuntil {to_date}").format(
+                        from_date=invoice.event.get_date_from_display(),
+                        to_date=invoice.event.get_date_to_display(),
+                    )
                 )
             else:
                 p_str = remove_control_characters(
-                    str(invoice.event.name) + ' - ' + invoice.event.get_date_from_display()
+                    str(invoice.event.name)
+                    + " - "
+                    + invoice.event.get_date_from_display()
                 )
         else:
             p_str = remove_control_characters(str(invoice.event.name))
@@ -103,7 +178,7 @@ class ZugferdMixin:
         if invoice.internal_reference:
             note = IncludedNote()
             note.content.add(
-                pgettext('invoice', 'Customer reference: {reference}').format(
+                pgettext("invoice", "Customer reference: {reference}").format(
                     reference=remove_control_characters(invoice.internal_reference)
                 )
             )
@@ -124,55 +199,22 @@ class ZugferdMixin:
             note.content.add(remove_control_characters(invoice.footer_text))
             doc.header.notes.add(note)
 
+        pt = PaymentTerms()
+        pt.description = remove_control_characters(invoice.payment_provider_text)
+        pt.due_date = invoice.order.expires
+        doc.trade.settlement.payment_reference = invoice.order.full_code
+        doc.trade.settlement.currency_code = cc
         if invoice.payment_provider_text:
             doc.trade.settlement.payment_means.information.add(
                 remove_control_characters(invoice.payment_provider_text)
             )
-
-        pt = PaymentTerms()
-        pt.description = remove_control_characters(invoice.payment_provider_text)
-        pt.due_date = invoice.order.expires
         doc.trade.settlement.terms.add(pt)
 
         if invoice.is_cancellation:
             ref = AdditionalReferencedDocument()
-            ref.issue_date_time = invoice.refers.date
+            ref.issuer_assigned_id = invoice.refers.number
+            ref.date_time_string = invoice.refers.date
             ref.type_code = "AWR"
-            ref.id = invoice.refers.number
-
-        taxvalue_map = defaultdict(Decimal)
-        grossvalue_map = defaultdict(Decimal)
-        total = Decimal('0.00')
-        for line in invoice.lines.all():
-            factor = -1 if line.gross_value < 0 else 1
-            li = LineItem()
-            if line.tax_rate == Decimal("0.00"):
-                if invoice.reverse_charge:
-                    category = "AE"
-                else:
-                    category = "E"  # TODO: Always correct?
-            else:
-                category = "S"
-            li.document.line_id = str(line.position + 1)
-            li.agreement.gross.amount = ((line.net_value * factor).quantize(Decimal('0.0001')), cc)
-            li.agreement.gross.basis_quantity = (Decimal('1.0000') * factor, 'C62')
-            li.agreement.net.amount = ((line.net_value * factor).quantize(Decimal('0.0001')), cc)
-            li.agreement.net.basis_quantity = (Decimal('1.0000') * factor, 'C62')
-            li.delivery.billed_quantity = (Decimal('1.0000') * factor, 'C62')
-            li.settlement.trade_tax.type_code = "VAT"
-            li.settlement.trade_tax.category_code = category
-            li.settlement.trade_tax.applicable_percent = line.tax_rate
-            li.settlement.monetary_summation.total_amount = (line.net_value * factor, cc)
-            desc = remove_control_characters(bleach.clean(line.description.replace("<br />", "\n"), tags=[]))
-            li.product.name = desc.split("\n")[0]
-            li.product.description = desc
-            doc.trade.items.add(li)
-            taxvalue_map[line.tax_rate, category] += line.tax_value
-            grossvalue_map[line.tax_rate, category] += line.gross_value
-            total += line.gross_value
-
-        doc.trade.settlement.payment_reference = invoice.order.full_code
-        doc.trade.settlement.currency_code = cc
 
         taxtotal = Decimal(0)
         for idx, gross in grossvalue_map.items():
@@ -194,7 +236,6 @@ class ZugferdMixin:
         doc.trade.settlement.monetary_summation.tax_total = (taxtotal, cc)
         doc.trade.settlement.monetary_summation.grand_total = (total, cc)
         doc.trade.settlement.monetary_summation.due_amount = (total, cc)
-
         return doc
 
     def generate(self, invoice):
@@ -206,25 +247,42 @@ class ZugferdMixin:
         try:
             xml = self._zugferd_generate_document(invoice).serialize()
         except Exception as e:
-            logger.exception("Could not generate ZUGFeRD data for invoice {}".format(invoice.number))
+            logger.exception(
+                "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
+            )
             raise e
 
         with tempfile.TemporaryDirectory() as tdir:
-            with open(os.path.join(tdir, 'in.pdf'), 'wb') as f:
+            with open(os.path.join(tdir, "in.pdf"), "wb") as f:
                 f.write(content)
-            subprocess.run([settings.CONFIG_FILE.get('tools', 'gs', fallback='gs'),
-                            '-dPDFA=3', '-dBATCH', '-dNOPAUSE', '-dNOOUTERSAVE', '-dUseCIEColor',
-                            '-sFONTPATH={}'.format(os.path.dirname(finders.find('fonts/OpenSans-Regular.ttf'))),
-                            '-sProcessColorModel=DeviceCMYK', '-sDEVICE=pdfwrite', '-sPDFACompatibilityPolicy=1',
-                            '-sOutputFile={}'.format(os.path.join(tdir, 'out.pdf')),
-                            os.path.join(tdir, 'in.pdf')], check=True)
-            with open(os.path.join(tdir, 'out.pdf'), 'rb') as f:
+            subprocess.run(
+                [
+                    settings.CONFIG_FILE.get("tools", "gs", fallback="gs"),
+                    "-dPDFA=3",
+                    "-dBATCH",
+                    "-dNOPAUSE",
+                    "-dNOOUTERSAVE",
+                    "-dUseCIEColor",
+                    "-sFONTPATH={}".format(
+                        os.path.dirname(finders.find("fonts/OpenSans-Regular.ttf"))
+                    ),
+                    "-sProcessColorModel=DeviceCMYK",
+                    "-sDEVICE=pdfwrite",
+                    "-sPDFACompatibilityPolicy=1",
+                    "-sOutputFile={}".format(os.path.join(tdir, "out.pdf")),
+                    os.path.join(tdir, "in.pdf"),
+                ],
+                check=True,
+            )
+            with open(os.path.join(tdir, "out.pdf"), "rb") as f:
                 content = f.read()
 
-        content = attach_xml(content, xml, 'EXTENDED')
+        content = attach_xml(content, xml, "EXTENDED")
         return fname, ftype, content
 
 
 class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
-    identifier = 'classic_zugferd'
-    verbose_name = lazy(lambda a: "{} + ZUGFeRD".format(ClassicInvoiceRenderer.verbose_name), str)
+    identifier = "classic_zugferd"
+    verbose_name = lazy(
+        lambda a: "{} + ZUGFeRD".format(ClassicInvoiceRenderer.verbose_name), str
+    )
