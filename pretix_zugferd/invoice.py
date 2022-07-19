@@ -35,10 +35,10 @@ class ZugferdMixin:
     def _zugferd_generate_document(self, invoice):
         cc = invoice.event.currency
         doc = Document()
+        #TODO doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
         doc.context.guideline_parameter.id = (
             "urn:ferd:CrossIndustryDocument:invoice:1p0:extended"
         )
-        doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
         doc.header.id = invoice.number
         doc.header.name = "RECHNUNG"
         doc.header.type_code = "380"
@@ -65,13 +65,11 @@ class ZugferdMixin:
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
             li.agreement.gross.amount = (
-                (line.net_value * factor).quantize(Decimal("0.0001")),
-                cc,
+                (line.net_value * factor).quantize(Decimal("0.0001"))
             )
             li.agreement.gross.basis_quantity = (Decimal("1.0000") * factor, "C62")
             li.agreement.net.amount = (
-                (line.net_value * factor).quantize(Decimal("0.0001")),
-                cc,
+                (line.net_value * factor).quantize(Decimal("0.0001"))
             )
             li.agreement.net.basis_quantity = (Decimal("1.0000") * factor, "C62")
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
@@ -79,8 +77,7 @@ class ZugferdMixin:
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
             li.settlement.monetary_summation.total_amount = (
-                line.net_value * factor,
-                cc,
+                line.net_value * factor
             )
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category] += line.tax_value
@@ -204,6 +201,7 @@ class ZugferdMixin:
         pt.due_date = invoice.order.expires
         doc.trade.settlement.payment_reference = invoice.order.full_code
         doc.trade.settlement.currency_code = cc
+        doc.trade.settlement.payment_means.type_code = "ZZZ"
         if invoice.payment_provider_text:
             doc.trade.settlement.payment_means.information.add(
                 remove_control_characters(invoice.payment_provider_text)
@@ -221,21 +219,21 @@ class ZugferdMixin:
             rate, category = idx
             tax = taxvalue_map[idx]
             trade_tax = ApplicableTradeTax()
-            trade_tax.calculated_amount = (tax, cc)
-            trade_tax.basis_amount = (gross - tax, cc)
+            trade_tax.calculated_amount = (tax)
+            trade_tax.basis_amount = (gross - tax)
             trade_tax.type_code = "VAT"
             trade_tax.category_code = category
             trade_tax.applicable_percent = Decimal(rate)
             doc.trade.settlement.trade_tax.add(trade_tax)
             taxtotal += tax
 
-        doc.trade.settlement.monetary_summation.line_total = (total - taxtotal, cc)
-        doc.trade.settlement.monetary_summation.charge_total = (Decimal("0.00"), cc)
-        doc.trade.settlement.monetary_summation.allowance_total = (Decimal("0.00"), cc)
-        doc.trade.settlement.monetary_summation.tax_basis_total = (total - taxtotal, cc)
-        doc.trade.settlement.monetary_summation.tax_total = (taxtotal, cc)
-        doc.trade.settlement.monetary_summation.grand_total = (total, cc)
-        doc.trade.settlement.monetary_summation.due_amount = (total, cc)
+        doc.trade.settlement.monetary_summation.line_total = (total - taxtotal)
+        doc.trade.settlement.monetary_summation.charge_total = (Decimal("0.00"))
+        doc.trade.settlement.monetary_summation.allowance_total = (Decimal("0.00"))
+        doc.trade.settlement.monetary_summation.tax_basis_total = (total - taxtotal)
+        doc.trade.settlement.monetary_summation.tax_total = (taxtotal)
+        doc.trade.settlement.monetary_summation.grand_total = (total)
+        doc.trade.settlement.monetary_summation.due_amount = (total)
         return doc
 
     def generate(self, invoice):
@@ -245,7 +243,7 @@ class ZugferdMixin:
             return fname, ftype, content
 
         try:
-            xml = self._zugferd_generate_document(invoice).serialize()
+            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_EXTENDED")
         except Exception as e:
             logger.exception(
                 "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
