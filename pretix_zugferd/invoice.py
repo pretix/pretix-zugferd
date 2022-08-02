@@ -37,7 +37,7 @@ class ZugferdMixin:
         doc = Document()
         #TODO doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
         doc.context.guideline_parameter.id = (
-            "urn:ferd:CrossIndustryDocument:invoice:1p0:extended"
+            "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
         )
         doc.header.id = invoice.number
         doc.header.name = "RECHNUNG"
@@ -203,6 +203,7 @@ class ZugferdMixin:
         doc.trade.settlement.currency_code = cc
         doc.trade.settlement.payment_means.type_code = "ZZZ"
         if invoice.payment_provider_text:
+            doc.trade.settlement.payment_means.type_code = 'ZZZ'  # todo (30=transfer, 48=credit card, 49=direct debit)
             doc.trade.settlement.payment_means.information.add(
                 remove_control_characters(invoice.payment_provider_text)
             )
@@ -219,21 +220,21 @@ class ZugferdMixin:
             rate, category = idx
             tax = taxvalue_map[idx]
             trade_tax = ApplicableTradeTax()
-            trade_tax.calculated_amount = (tax)
-            trade_tax.basis_amount = (gross - tax)
+            trade_tax.calculated_amount = tax
+            trade_tax.basis_amount = gross - tax
             trade_tax.type_code = "VAT"
             trade_tax.category_code = category
             trade_tax.applicable_percent = Decimal(rate)
             doc.trade.settlement.trade_tax.add(trade_tax)
             taxtotal += tax
 
-        doc.trade.settlement.monetary_summation.line_total = (total - taxtotal)
-        doc.trade.settlement.monetary_summation.charge_total = (Decimal("0.00"))
-        doc.trade.settlement.monetary_summation.allowance_total = (Decimal("0.00"))
-        doc.trade.settlement.monetary_summation.tax_basis_total = (total - taxtotal)
-        doc.trade.settlement.monetary_summation.tax_total = (taxtotal)
-        doc.trade.settlement.monetary_summation.grand_total = (total)
-        doc.trade.settlement.monetary_summation.due_amount = (total)
+        doc.trade.settlement.monetary_summation.line_total = total - taxtotal
+        doc.trade.settlement.monetary_summation.charge_total = Decimal("0.00")
+        doc.trade.settlement.monetary_summation.allowance_total = Decimal("0.00")
+        doc.trade.settlement.monetary_summation.tax_basis_total = total - taxtotal
+        doc.trade.settlement.monetary_summation.tax_total = taxtotal
+        doc.trade.settlement.monetary_summation.grand_total = total
+        doc.trade.settlement.monetary_summation.due_amount = total
         return doc
 
     def generate(self, invoice):
