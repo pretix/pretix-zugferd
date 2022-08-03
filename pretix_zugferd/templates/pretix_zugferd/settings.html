@@ -1,0 +1,22 @@
+{% extends "pretixcontrol/event/settings_base.html" %}
+{% load i18n %}
+{% load bootstrap3 %}
+{% block inside %}
+    <h1>{% trans "ZUGFeRD" %}</h1>
+    <div class="alert alert-info">
+        {% blocktrans trimmed %}
+            If you want to use the XRechnung profile, you should make use of the "custom field" option in invoice settings
+            for the buyer reference ID.
+        {% endblocktrans %}
+    </div>
+    <form action="" method="post" class="form-horizontal" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_form form layout="horizontal" %}
+        <div class="form-group submit-group">
+            <button type="submit" class="btn btn-primary btn-save">
+                {% trans "Save" %}
+            </button>
+        </div>
+    </form>
+{% endblock %}

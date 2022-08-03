@@ -34,19 +34,20 @@ def remove_control_characters(s):
 
 class ZugferdMixin:
     profile = "EXTENDED"
+    schema = "EXTENDED"
+    guideline_id = "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
 
     def _zugferd_generate_document(self, invoice):
         cc = invoice.event.currency
         doc = Document()
-        #TODO doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
-        doc.context.guideline_parameter.id = (
-            "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
-        )
+        if self.profile == "EXTENDED":
+            doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
+            doc.header.name = "RECHNUNG"
+            doc.header.languages.add(invoice.locale[:2])
+        doc.context.guideline_parameter.id = self.guideline_id
         doc.header.id = invoice.number
-        doc.header.name = "RECHNUNG"
         doc.header.type_code = "380"
         doc.header.issue_date_time = invoice.date
-        doc.header.languages.add(invoice.locale[:2])
         # ITEMS
         taxvalue_map = defaultdict(Decimal)
         grossvalue_map = defaultdict(Decimal)
@@ -126,6 +127,13 @@ class ZugferdMixin:
                 )
             )
 
+        if invoice.event.settings.zugferd_seller_contact_name:
+            doc.trade.agreement.seller.contact.person_name = invoice.event.settings.zugferd_seller_contact_name
+        if invoice.event.settings.zugferd_seller_contact_email:
+            doc.trade.agreement.seller.contact.email.address = invoice.event.settings.zugferd_seller_contact_email
+        if invoice.event.settings.zugferd_seller_contact_phone:
+            doc.trade.agreement.seller.contact.telephone.number = invoice.event.settings.zugferd_seller_contact_phone
+
         doc.trade.agreement.buyer.name = remove_control_characters(
             invoice.invoice_to_company or invoice.invoice_to_name
         )
@@ -153,7 +161,7 @@ class ZugferdMixin:
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
                 TaxRegistration(
-                    id=("FC", remove_control_characters(invoice.invoice_to_vat_id))
+                    id=("VA", remove_control_characters(invoice.invoice_to_vat_id))
                 )
             )
 
@@ -210,11 +218,28 @@ class ZugferdMixin:
         pt = PaymentTerms()
         pt.description = remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
         pt.due = invoice.order.expires
+
+        lp = invoice.order.payments.exclude(provider__in=("giftcard", "offsetting", "free", "manual", "boxoffice")).order_by('local_id').last()
+        print(lp)
+        if lp and lp.provider == "banktransfer":
+            if invoice.event.settings.payment_banktransfer_bank_details_type == 'sepa':
+                doc.trade.settlement.payment_means.type_code = "30"
+                doc.trade.settlement.payment_means.payee_account.iban = invoice.event.settings.payment_banktransfer_bank_details_sepa_iban
+                doc.trade.settlement.payment_means.payee_institution.bic = invoice.event.settings.payment_banktransfer_bank_details_sepa_bic
+
+            else:
+                doc.trade.settlement.payment_means.type_code = "58"
+        elif lp and lp.provider == "sepadebit":
+            doc.trade.settlement.payment_means.type_code = "59"
+            doc.trade.settlement.payment_means.payer_account.iban = lp.info_data.get("iban")
+            doc.trade.settlement.creditor_reference_id = invoice.event.settings.payment_sepadebit_creditor_id
+            pt.debit_mandate_id = lp.info_data.get("reference")
+        else:
+            doc.trade.settlement.payment_means.type_code = "ZZZ"
+
         doc.trade.settlement.payment_reference = invoice.order.full_code
         doc.trade.settlement.currency_code = cc
-        doc.trade.settlement.payment_means.type_code = "ZZZ"
         if invoice.payment_provider_text:
-            doc.trade.settlement.payment_means.type_code = 'ZZZ'  # todo (30=transfer, 48=credit card, 49=direct debit)
             doc.trade.settlement.payment_means.information.add(
                 remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
             )
@@ -257,7 +282,7 @@ class ZugferdMixin:
             return fname, ftype, content
 
         try:
-            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_" + self.profile)
+            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_" + self.schema)
         except Exception as e:
             logger.exception(
                 "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
@@ -296,12 +321,27 @@ class ZugferdMixin:
 class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
     identifier = "classic_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 EXTENDED".format(ClassicInvoiceRenderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(ClassicInvoiceRenderer.verbose_name), str
     )
 
 
 class Modern1ZugferdInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 EXTENDED".format(Modern1Renderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(Modern1Renderer.verbose_name), str
     )
+
+
+class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
+    identifier = "modern1_zugferd_xrechnung"
+    profile = "XRECHNUNG"
+    schema = "EN16931"
+    guideline_id = "urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.2"
+    verbose_name = lazy(
+        lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(Modern1Renderer.verbose_name), str
+    )
+
+    def _zugferd_generate_document(self, invoice):
+        doc = super()._zugferd_generate_document(invoice)
+        doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
+        return doc
