@@ -19,6 +19,7 @@ from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
 from pretix.base.invoice import ClassicInvoiceRenderer
+from pretix.base.models.tax import EU_COUNTRIES
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +52,19 @@ class ZugferdMixin:
         for line in invoice.lines.all():
             factor = -1 if line.gross_value < 0 else 1
             li = LineItem()
+            exemption_reason = None
             if line.tax_rate == Decimal("0.00"):
                 if invoice.reverse_charge:
-                    category = "AE"
+                    category = "AE"  # Reverse charge
+                elif str(invoice.invoice_from_country) in EU_COUNTRIES and str(invoice.invoice_to_country) not in EU_COUNTRIES:
+                    category = "O"  # Services outside scope of tax
                 else:
-                    category = "E"  # TODO: Always correct?
+                    # We don't know with pretix' information whether this is Z ("zero-rated goods"), E ("exempt from tax")
+                    # or something else. Let's assume E and refer to the notes.
+                    category = "E"
+                    exemption_reason = pgettext("zugferd", "See invoice notes for more information")
             else:
-                category = "S"
+                category = "S"  # Standard rate
             li.document.line_id = str(line.position + 1)
             desc = remove_control_characters(
                 bleach.clean(line.description.replace("<br />", "\n"), tags=[])
@@ -76,12 +83,14 @@ class ZugferdMixin:
             li.settlement.trade_tax.type_code = "VAT"
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
+            if exemption_reason:
+                li.settlement.trade_tax.exemption_reason = exemption_reason
             li.settlement.monetary_summation.total_amount = (
                 line.net_value * factor
             )
             doc.trade.items.add(li)
-            taxvalue_map[line.tax_rate, category] += line.tax_value
-            grossvalue_map[line.tax_rate, category] += line.gross_value
+            taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
+            grossvalue_map[line.tax_rate, category, exemption_reason] += line.gross_value
             total += line.gross_value
 
         doc.trade.agreement.seller.name = remove_control_characters(
@@ -183,29 +192,29 @@ class ZugferdMixin:
 
         if invoice.introductory_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.introductory_text))
+            note.content.add(remove_control_characters(invoice.introductory_text.replace("<br />", " / ")))
             doc.header.notes.add(note)
 
         if invoice.additional_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.additional_text))
+            note.content.add(remove_control_characters(invoice.additional_text.replace("<br />", " / ")))
             doc.header.notes.add(note)
 
         if invoice.footer_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.footer_text))
+            note.content.add(remove_control_characters(invoice.footer_text.replace("<br />", " / ")))
             doc.header.notes.add(note)
 
         pt = PaymentTerms()
-        pt.description = remove_control_characters(invoice.payment_provider_text)
-        pt.due_date = invoice.order.expires
+        pt.description = remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
+        pt.due = invoice.order.expires
         doc.trade.settlement.payment_reference = invoice.order.full_code
         doc.trade.settlement.currency_code = cc
         doc.trade.settlement.payment_means.type_code = "ZZZ"
         if invoice.payment_provider_text:
             doc.trade.settlement.payment_means.type_code = 'ZZZ'  # todo (30=transfer, 48=credit card, 49=direct debit)
             doc.trade.settlement.payment_means.information.add(
-                remove_control_characters(invoice.payment_provider_text)
+                remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
             )
         doc.trade.settlement.terms.add(pt)
 
@@ -217,14 +226,16 @@ class ZugferdMixin:
 
         taxtotal = Decimal(0)
         for idx, gross in grossvalue_map.items():
-            rate, category = idx
+            rate, category, exemption_reason = idx
             tax = taxvalue_map[idx]
             trade_tax = ApplicableTradeTax()
             trade_tax.calculated_amount = tax
             trade_tax.basis_amount = gross - tax
             trade_tax.type_code = "VAT"
             trade_tax.category_code = category
-            trade_tax.applicable_percent = Decimal(rate)
+            if exemption_reason:
+                trade_tax.exemption_reason = exemption_reason
+            trade_tax.rate_applicable_percent = Decimal(rate)
             doc.trade.settlement.trade_tax.add(trade_tax)
             taxtotal += tax
 
@@ -232,7 +243,7 @@ class ZugferdMixin:
         doc.trade.settlement.monetary_summation.charge_total = Decimal("0.00")
         doc.trade.settlement.monetary_summation.allowance_total = Decimal("0.00")
         doc.trade.settlement.monetary_summation.tax_basis_total = total - taxtotal
-        doc.trade.settlement.monetary_summation.tax_total = taxtotal
+        doc.trade.settlement.monetary_summation.tax_total = (taxtotal, cc)
         doc.trade.settlement.monetary_summation.grand_total = total
         doc.trade.settlement.monetary_summation.due_amount = total
         return doc
