@@ -261,13 +261,13 @@ class ZugferdMixin:
                     "-dBATCH",
                     "-dNOPAUSE",
                     "-dNOOUTERSAVE",
-                    "-dUseCIEColor",
+                    "-sColorConversionStrategy=UseDeviceIndependentColor",
                     "-sFONTPATH={}".format(
                         os.path.dirname(finders.find("fonts/OpenSans-Regular.ttf"))
                     ),
                     "-sProcessColorModel=DeviceCMYK",
                     "-sDEVICE=pdfwrite",
-                    "-sPDFACompatibilityPolicy=1",
+                    "-dPDFACompatibilityPolicy=1",
                     "-sOutputFile={}".format(os.path.join(tdir, "out.pdf")),
                     os.path.join(tdir, "in.pdf"),
                 ],
