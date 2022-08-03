@@ -7,3 +7,9 @@ def register_infoice_renderers(sender, **kwargs):
     from .invoice import ZugferdInvoiceRenderer
 
     return ZugferdInvoiceRenderer
+
+@receiver(register_invoice_renderers, dispatch_uid="Modern1_zugferd_invoice_renderer")
+def register_infoice_renderers(sender, **kwargs):
+    from .invoice import Modern1ZugferdInvoiceRenderer
+
+    return Modern1ZugferdInvoiceRenderer

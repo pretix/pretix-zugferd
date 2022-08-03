@@ -18,7 +18,7 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
-from pretix.base.invoice import ClassicInvoiceRenderer
+from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
 from pretix.base.models.tax import EU_COUNTRIES
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,8 @@ def remove_control_characters(s):
 
 
 class ZugferdMixin:
+    profile = "EXTENDED"
+
     def _zugferd_generate_document(self, invoice):
         cc = invoice.event.currency
         doc = Document()
@@ -255,7 +257,7 @@ class ZugferdMixin:
             return fname, ftype, content
 
         try:
-            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_EXTENDED")
+            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_" + self.profile)
         except Exception as e:
             logger.exception(
                 "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
@@ -287,12 +289,19 @@ class ZugferdMixin:
             with open(os.path.join(tdir, "out.pdf"), "rb") as f:
                 content = f.read()
 
-        content = attach_xml(content, xml, "EXTENDED")
+        content = attach_xml(content, xml, self.profile)
         return fname, ftype, content
 
 
 class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
     identifier = "classic_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD".format(ClassicInvoiceRenderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 EXTENDED".format(ClassicInvoiceRenderer.verbose_name), str
+    )
+
+
+class Modern1ZugferdInvoiceRenderer(ZugferdMixin, Modern1Renderer):
+    identifier = "modern1_zugferd"
+    verbose_name = lazy(
+        lambda a: "{} + ZUGFeRD 2.2 EXTENDED".format(Modern1Renderer.verbose_name), str
     )
