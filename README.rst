@@ -38,7 +38,7 @@ Development setup
 License
 -------
 
-Copyright 2018 Raphael Michel
+Copyright 2018-2022 rami.io GmbH
 
 Released under the terms of the Apache License 2.0
 
