@@ -278,7 +278,8 @@ class ZugferdMixin:
     def generate(self, invoice):
         fname, ftype, content = super().generate(invoice)
 
-        if not invoice.invoice_from_name:
+        if not invoice.invoice_from_name or not invoice.invoice_to_country:
+            # if these fields are missing, the ZUGFeRD invoice will always be invalid so we just don't create one
             return fname, ftype, content
 
         try:
