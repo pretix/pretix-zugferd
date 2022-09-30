@@ -23,6 +23,7 @@ class ZugferdSettingsForm(SettingsForm):
         label=_("Seller contact phone number"),
         help_text=_("Required for a valid XRechnung"),
         required=False,
+        empty_value=None,
     )
 
 
