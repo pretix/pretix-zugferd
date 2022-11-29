@@ -11,7 +11,7 @@ class PluginApp(AppConfig):
         name = gettext_lazy("ZUGFeRD invoices")
         author = "Raphael Michel"
         visible = True
-        version = "2.0.0"
+        version = "2.0.1"
         category = "FEATURE"
         compatibility = "pretix>=4.13.0"
 
