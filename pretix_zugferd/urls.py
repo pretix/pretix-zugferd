@@ -1,10 +1,10 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .views import (
     SettingsView
 )
 
 urlpatterns = [
-    url(r'^control/event/(?P<organizer>[^/]+)/(?P<event>[^/]+)/settings/zugferd/$',
+    path('control/event/<str:organizer>/<str:event>/settings/zugferd/',
         SettingsView.as_view(), name='settings'),
 ]

@@ -3,6 +3,7 @@ from distutils.command.build import build
 
 from django.core import management
 from setuptools import find_packages, setup
+from pretix_zugferd import __version__
 
 try:
     with open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding='utf-8') as f:
@@ -24,7 +25,7 @@ cmdclass = {
 
 setup(
     name='pretix-zugferd',
-    version='2.0.1',
+    version=__version__,
     description='Invoice renderer that annotates pretix invoices with ZUGFeRD data',
     long_description=long_description,
     url='https://github.com/pretixeu/pretix-zugferd',
