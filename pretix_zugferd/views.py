@@ -25,6 +25,10 @@ class ZugferdSettingsForm(SettingsForm):
         required=False,
         empty_value=None,
     )
+    zugferd_include_delivery_date = forms.BooleanField(
+        label=_("Include event date as delivery date"),
+        required=False,
+    )
 
 
 class SettingsView(EventSettingsViewMixin, EventSettingsFormView):

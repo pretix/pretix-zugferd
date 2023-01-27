@@ -165,6 +165,11 @@ class ZugferdMixin:
                 )
             )
 
+        if invoice.event.settings.get("zugferd_include_delivery_date", as_type=bool):
+            ds = [l.event_date_to or l.event_date_from for l in invoice.lines.all() if l.event_date_to or l.event_date_from]
+            if ds:
+                doc.trade.delivery.event.occurrence = max(ds)
+
         note = IncludedNote()
         note.content.add(_("Order code: {code}").format(code=invoice.order.full_code))
         doc.header.notes.add(note)
