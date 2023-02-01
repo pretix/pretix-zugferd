@@ -34,7 +34,7 @@ setup(
     license='Apache Software License',
 
     install_requires=[
-        'drafthorse==2.2.*',
+        'drafthorse==2.2.*,>=2.2.1',
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
