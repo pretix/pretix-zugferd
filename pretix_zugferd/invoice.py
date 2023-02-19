@@ -109,9 +109,10 @@ class ZugferdMixin:
         doc.trade.agreement.seller.address.city_name = remove_control_characters(
             invoice.invoice_from_city
         )
-        doc.trade.agreement.seller.address.country_id = str(
-            remove_control_characters(invoice.invoice_from_country)
-        )
+        if str(invoice.invoice_from_country)[0] != 'X':
+            doc.trade.agreement.seller.address.country_id = str(
+                remove_control_characters(invoice.invoice_from_country)
+            )
 
         if invoice.invoice_from_tax_id:
             doc.trade.agreement.seller.tax_registrations.add(
@@ -154,9 +155,10 @@ class ZugferdMixin:
         doc.trade.agreement.buyer.address.city_name = remove_control_characters(
             invoice.invoice_to_city
         )
-        doc.trade.agreement.buyer.address.country_id = remove_control_characters(
-            str(invoice.invoice_to_country)
-        )
+        if str(invoice.invoice_to_country)[0] != 'X':
+            doc.trade.agreement.buyer.address.country_id = remove_control_characters(
+                str(invoice.invoice_to_country)
+            )
 
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
