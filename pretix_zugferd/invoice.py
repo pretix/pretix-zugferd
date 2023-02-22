@@ -288,6 +288,10 @@ class ZugferdMixin:
         if not invoice.invoice_from_name or not invoice.invoice_to_country or not invoice.invoice_from_country:
             return fname, ftype, content
 
+        if str(invoice.invoice_to_country) in settings.COUNTRIES_OVERRIDE:
+            # It's not possible to generate a valid ZUGFeRD invoice with the recipient in a non-standard country code (e.g. Kosovo)
+            return fname, ftype, content
+
         try:
             xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_" + self.schema)
         except Exception as e:
