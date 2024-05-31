@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext, gettext_lazy
+
 from . import __version__
 
 
@@ -41,5 +42,3 @@ class PluginApp(AppConfig):
 
     def ready(self):
         from . import signals  # NOQA
-
-

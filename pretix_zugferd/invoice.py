@@ -59,13 +59,18 @@ class ZugferdMixin:
             if line.tax_rate == Decimal("0.00"):
                 if invoice.reverse_charge:
                     category = "AE"  # Reverse charge
-                elif str(invoice.invoice_from_country) in EU_COUNTRIES and str(invoice.invoice_to_country) not in EU_COUNTRIES:
+                elif (
+                    str(invoice.invoice_from_country) in EU_COUNTRIES
+                    and str(invoice.invoice_to_country) not in EU_COUNTRIES
+                ):
                     category = "O"  # Services outside scope of tax
                 else:
                     # We don't know with pretix' information whether this is Z ("zero-rated goods"), E ("exempt from tax")
                     # or something else. Let's assume E and refer to the notes.
                     category = "E"
-                    exemption_reason = pgettext("zugferd", "See invoice notes for more information")
+                    exemption_reason = pgettext(
+                        "zugferd", "See invoice notes for more information"
+                    )
             else:
                 category = "S"  # Standard rate
             li.document.line_id = str(line.position + 1)
@@ -74,12 +79,12 @@ class ZugferdMixin:
             )
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
-            li.agreement.gross.amount = (
-                (line.net_value * factor).quantize(Decimal("0.0001"))
+            li.agreement.gross.amount = (line.net_value * factor).quantize(
+                Decimal("0.0001")
             )
             li.agreement.gross.basis_quantity = (Decimal("1.0000") * factor, "C62")
-            li.agreement.net.amount = (
-                (line.net_value * factor).quantize(Decimal("0.0001"))
+            li.agreement.net.amount = (line.net_value * factor).quantize(
+                Decimal("0.0001")
             )
             li.agreement.net.basis_quantity = (Decimal("1.0000") * factor, "C62")
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
@@ -88,12 +93,12 @@ class ZugferdMixin:
             li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
             if exemption_reason:
                 li.settlement.trade_tax.exemption_reason = exemption_reason
-            li.settlement.monetary_summation.total_amount = (
-                line.net_value * factor
-            )
+            li.settlement.monetary_summation.total_amount = line.net_value * factor
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
-            grossvalue_map[line.tax_rate, category, exemption_reason] += line.gross_value
+            grossvalue_map[
+                line.tax_rate, category, exemption_reason
+            ] += line.gross_value
             total += line.gross_value
 
         doc.trade.agreement.seller.name = remove_control_characters(
@@ -109,7 +114,7 @@ class ZugferdMixin:
         doc.trade.agreement.seller.address.city_name = remove_control_characters(
             invoice.invoice_from_city
         )
-        if str(invoice.invoice_from_country)[0] != 'X':
+        if str(invoice.invoice_from_country)[0] != "X":
             doc.trade.agreement.seller.address.country_id = str(
                 remove_control_characters(invoice.invoice_from_country)
             )
@@ -129,11 +134,17 @@ class ZugferdMixin:
             )
 
         if invoice.event.settings.zugferd_seller_contact_name:
-            doc.trade.agreement.seller.contact.person_name = invoice.event.settings.zugferd_seller_contact_name
+            doc.trade.agreement.seller.contact.person_name = (
+                invoice.event.settings.zugferd_seller_contact_name
+            )
         if invoice.event.settings.zugferd_seller_contact_email:
-            doc.trade.agreement.seller.contact.email.address = invoice.event.settings.zugferd_seller_contact_email
+            doc.trade.agreement.seller.contact.email.address = (
+                invoice.event.settings.zugferd_seller_contact_email
+            )
         if invoice.event.settings.zugferd_seller_contact_phone:
-            doc.trade.agreement.seller.contact.telephone.number = invoice.event.settings.zugferd_seller_contact_phone
+            doc.trade.agreement.seller.contact.telephone.number = (
+                invoice.event.settings.zugferd_seller_contact_phone
+            )
 
         doc.trade.agreement.buyer.name = remove_control_characters(
             invoice.invoice_to_company or invoice.invoice_to_name
@@ -155,7 +166,7 @@ class ZugferdMixin:
         doc.trade.agreement.buyer.address.city_name = remove_control_characters(
             invoice.invoice_to_city
         )
-        if str(invoice.invoice_to_country)[0] != 'X':
+        if str(invoice.invoice_to_country)[0] != "X":
             doc.trade.agreement.buyer.address.country_id = remove_control_characters(
                 str(invoice.invoice_to_country)
             )
@@ -168,7 +179,11 @@ class ZugferdMixin:
             )
 
         if invoice.event.settings.get("zugferd_include_delivery_date", as_type=bool):
-            ds = [l.event_date_to or l.event_date_from for l in invoice.lines.all() if l.event_date_to or l.event_date_from]
+            ds = [
+                line.event_date_to or line.event_date_from
+                for line in invoice.lines.all()
+                if line.event_date_to or line.event_date_from
+            ]
             if ds:
                 doc.trade.delivery.event.occurrence = max(ds)
 
@@ -209,37 +224,63 @@ class ZugferdMixin:
 
         if invoice.introductory_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.introductory_text.replace("<br />", " / ")))
+            note.content.add(
+                remove_control_characters(
+                    invoice.introductory_text.replace("<br />", " / ")
+                )
+            )
             doc.header.notes.add(note)
 
         if invoice.additional_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.additional_text.replace("<br />", " / ")))
+            note.content.add(
+                remove_control_characters(
+                    invoice.additional_text.replace("<br />", " / ")
+                )
+            )
             doc.header.notes.add(note)
 
         if invoice.footer_text:
             note = IncludedNote()
-            note.content.add(remove_control_characters(invoice.footer_text.replace("<br />", " / ")))
+            note.content.add(
+                remove_control_characters(invoice.footer_text.replace("<br />", " / "))
+            )
             doc.header.notes.add(note)
 
         pt = PaymentTerms()
-        pt.description = remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
+        pt.description = remove_control_characters(
+            invoice.payment_provider_text.replace("<br />", " / ")
+        )
         pt.due = invoice.order.expires
 
-        lp = invoice.order.payments.exclude(provider__in=("giftcard", "offsetting", "free", "manual", "boxoffice")).order_by('local_id').last()
+        lp = (
+            invoice.order.payments.exclude(
+                provider__in=("giftcard", "offsetting", "free", "manual", "boxoffice")
+            )
+            .order_by("local_id")
+            .last()
+        )
         print(lp)
         if lp and lp.provider == "banktransfer":
-            if invoice.event.settings.payment_banktransfer_bank_details_type == 'sepa':
+            if invoice.event.settings.payment_banktransfer_bank_details_type == "sepa":
                 doc.trade.settlement.payment_means.type_code = "30"
-                doc.trade.settlement.payment_means.payee_account.iban = invoice.event.settings.payment_banktransfer_bank_details_sepa_iban
-                doc.trade.settlement.payment_means.payee_institution.bic = invoice.event.settings.payment_banktransfer_bank_details_sepa_bic
+                doc.trade.settlement.payment_means.payee_account.iban = (
+                    invoice.event.settings.payment_banktransfer_bank_details_sepa_iban
+                )
+                doc.trade.settlement.payment_means.payee_institution.bic = (
+                    invoice.event.settings.payment_banktransfer_bank_details_sepa_bic
+                )
 
             else:
                 doc.trade.settlement.payment_means.type_code = "58"
         elif lp and lp.provider == "sepadebit":
             doc.trade.settlement.payment_means.type_code = "59"
-            doc.trade.settlement.payment_means.payer_account.iban = lp.info_data.get("iban")
-            doc.trade.settlement.creditor_reference_id = invoice.event.settings.payment_sepadebit_creditor_id
+            doc.trade.settlement.payment_means.payer_account.iban = lp.info_data.get(
+                "iban"
+            )
+            doc.trade.settlement.creditor_reference_id = (
+                invoice.event.settings.payment_sepadebit_creditor_id
+            )
             pt.debit_mandate_id = lp.info_data.get("reference")
         else:
             doc.trade.settlement.payment_means.type_code = "ZZZ"
@@ -248,7 +289,9 @@ class ZugferdMixin:
         doc.trade.settlement.currency_code = cc
         if invoice.payment_provider_text:
             doc.trade.settlement.payment_means.information.add(
-                remove_control_characters(invoice.payment_provider_text.replace("<br />", " / "))
+                remove_control_characters(
+                    invoice.payment_provider_text.replace("<br />", " / ")
+                )
             )
         doc.trade.settlement.terms.add(pt)
 
@@ -285,7 +328,11 @@ class ZugferdMixin:
     def generate(self, invoice):
         fname, ftype, content = super().generate(invoice)
 
-        if not invoice.invoice_from_name or not invoice.invoice_to_country or not invoice.invoice_from_country:
+        if (
+            not invoice.invoice_from_name
+            or not invoice.invoice_to_country
+            or not invoice.invoice_from_country
+        ):
             return fname, ftype, content
 
         if str(invoice.invoice_to_country) in settings.COUNTRIES_OVERRIDE:
@@ -293,7 +340,9 @@ class ZugferdMixin:
             return fname, ftype, content
 
         try:
-            xml = self._zugferd_generate_document(invoice).serialize(schema="FACTUR-X_" + self.schema)
+            xml = self._zugferd_generate_document(invoice).serialize(
+                schema="FACTUR-X_" + self.schema
+            )
         except Exception as e:
             logger.exception(
                 "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
@@ -332,14 +381,20 @@ class ZugferdMixin:
 class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
     identifier = "classic_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(ClassicInvoiceRenderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(
+            ClassicInvoiceRenderer.verbose_name
+        ),
+        str,
     )
 
 
 class Modern1ZugferdInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(Modern1Renderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(
+            Modern1Renderer.verbose_name
+        ),
+        str,
     )
 
 
@@ -347,9 +402,14 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd_xrechnung"
     profile = "XRECHNUNG"
     schema = "EN16931"
-    guideline_id = "urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.2"
+    guideline_id = (
+        "urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.2"
+    )
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(Modern1Renderer.verbose_name), str
+        lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(
+            Modern1Renderer.verbose_name
+        ),
+        str,
     )
 
     def _zugferd_generate_document(self, invoice):
