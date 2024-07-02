@@ -18,6 +18,9 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
+from reportlab.lib.units import mm
+from reportlab.pdfgen.canvas import Canvas
+
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
 from pretix.base.models.tax import EU_COUNTRIES
 
@@ -260,7 +263,6 @@ class ZugferdMixin:
             .order_by("local_id")
             .last()
         )
-        print(lp)
         if lp and lp.provider == "banktransfer":
             if invoice.event.settings.payment_banktransfer_bank_details_type == "sepa":
                 doc.trade.settlement.payment_means.type_code = "30"
@@ -325,29 +327,46 @@ class ZugferdMixin:
         doc.trade.settlement.monetary_summation.due_amount = total
         return doc
 
+    def _on_first_page(self, canvas: Canvas, doc):
+        super()._on_first_page(canvas, doc)
+        if not self.event.settings.zugferd_hide_label:
+            canvas.saveState()
+            canvas.translate(10 * mm, 10 * mm)
+            canvas.rotate(90)
+            canvas.setFont("OpenSansBd", 8)
+            canvas.setFillColorRGB(80 / 255, 161 / 255, 103 / 255)
+            canvas.drawString(
+                0, 0, _("eInvoice included")
+            )
+            canvas.restoreState()
+
     def generate(self, invoice):
-        fname, ftype, content = super().generate(invoice)
-
+        self.__zugferd = True
         if (
-            not invoice.invoice_from_name
-            or not invoice.invoice_to_country
-            or not invoice.invoice_from_country
+                not invoice.invoice_from_name
+                or not invoice.invoice_to_country
+                or not invoice.invoice_from_country
         ):
-            return fname, ftype, content
-
-        if str(invoice.invoice_to_country) in settings.COUNTRIES_OVERRIDE:
+            self.__zugferd = False
+        elif str(invoice.invoice_to_country) in settings.COUNTRIES_OVERRIDE:
             # It's not possible to generate a valid ZUGFeRD invoice with the recipient in a non-standard country code (e.g. Kosovo)
-            return fname, ftype, content
+            self.__zugferd = False
 
         try:
             xml = self._zugferd_generate_document(invoice).serialize(
                 schema="FACTUR-X_" + self.schema
             )
         except Exception as e:
+            self.__zugferd = False
             logger.exception(
                 "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
             )
             raise e
+
+        fname, ftype, content = super().generate(invoice)
+
+        if not self.__zugferd:
+            return fname, ftype, content
 
         with tempfile.TemporaryDirectory() as tdir:
             with open(os.path.join(tdir, "in.pdf"), "wb") as f:

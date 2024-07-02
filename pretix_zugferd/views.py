@@ -30,6 +30,10 @@ class ZugferdSettingsForm(SettingsForm):
         label=_("Include event date as delivery date"),
         required=False,
     )
+    zugferd_hide_label = forms.BooleanField(
+        label=_("Hide label that advertises the included XRechnung"),
+        required=False,
+    )
 
 
 class SettingsView(EventSettingsViewMixin, EventSettingsFormView):
