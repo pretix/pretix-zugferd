@@ -352,16 +352,16 @@ class ZugferdMixin:
             # It's not possible to generate a valid ZUGFeRD invoice with the recipient in a non-standard country code (e.g. Kosovo)
             self.__zugferd = False
 
-        try:
-            xml = self._zugferd_generate_document(invoice).serialize(
-                schema="FACTUR-X_" + self.schema
-            )
-        except Exception as e:
-            self.__zugferd = False
-            logger.exception(
-                "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
-            )
-            raise e
+        if self.__zugferd:
+            try:
+                xml = self._zugferd_generate_document(invoice).serialize(
+                    schema="FACTUR-X_" + self.schema
+                )
+            except Exception as e:
+                self.__zugferd = False
+                logger.exception(
+                    "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
+                )
 
         fname, ftype, content = super().generate(invoice)
 
