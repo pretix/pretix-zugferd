@@ -357,7 +357,7 @@ class ZugferdMixin:
                 xml = self._zugferd_generate_document(invoice).serialize(
                     schema="FACTUR-X_" + self.schema
                 )
-            except Exception as e:
+            except Exception:
                 self.__zugferd = False
                 logger.exception(
                     "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
