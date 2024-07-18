@@ -18,11 +18,10 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
-from reportlab.lib.units import mm
-from reportlab.pdfgen.canvas import Canvas
-
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
 from pretix.base.models.tax import EU_COUNTRIES
+from reportlab.lib.units import mm
+from reportlab.pdfgen.canvas import Canvas
 
 logger = logging.getLogger(__name__)
 

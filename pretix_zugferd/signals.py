@@ -1,6 +1,5 @@
 from django.dispatch import receiver
 from django.urls import resolve, reverse
-
 from pretix.base.settings import settings_hierarkey
 from pretix.base.signals import register_invoice_renderers
 from pretix.control.signals import nav_event_settings
