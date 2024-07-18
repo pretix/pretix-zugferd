@@ -1,5 +1,6 @@
 from django.dispatch import receiver
 from django.urls import resolve, reverse
+from pretix.base.settings import settings_hierarkey
 from pretix.base.signals import register_invoice_renderers
 from pretix.control.signals import nav_event_settings
 
@@ -48,3 +49,6 @@ def navbar_info(sender, request, **kwargs):
             "active": url.namespace == "plugins:pretix_zugferd",
         }
     ]
+
+
+settings_hierarkey.add_default("zugferd_hide_label", "True", default_type=bool)
