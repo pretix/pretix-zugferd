@@ -328,7 +328,7 @@ class ZugferdMixin:
 
     def _on_first_page(self, canvas: Canvas, doc):
         super()._on_first_page(canvas, doc)
-        if not self.event.settings.zugferd_hide_label:
+        if not self.event.settings.zugferd_hide_label and self.__zugferd:
             canvas.saveState()
             canvas.translate(10 * mm, 10 * mm)
             canvas.rotate(90)
