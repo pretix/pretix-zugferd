@@ -82,7 +82,7 @@ class ZugferdMixin:
                         "zugferd", "See invoice notes for more information"
                     )
             else:
-                category = "S"  # Asume standard rate
+                category = "S"  # Assume standard rate
             li.document.line_id = str(line.position + 1)
             desc = remove_control_characters(
                 bleach.clean(line.description.replace("<br />", "\n"), tags=[])
