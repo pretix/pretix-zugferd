@@ -341,6 +341,7 @@ class ZugferdMixin:
 
     def generate(self, invoice):
         self.__zugferd = True
+        self.invoice = invoice
         if (
                 not invoice.invoice_from_name
                 or not invoice.invoice_to_country
