@@ -42,17 +42,6 @@ class SettingsView(EventSettingsViewMixin, EventSettingsFormView):
     template_name = "pretix_zugferd/settings.html"
     permission = "can_change_settings"
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['settings_url'] = reverse(
-            "control:event.settings.invoice",
-            kwargs={
-                "organizer": self.request.event.organizer.slug,
-                "event": self.request.event.slug,
-            },
-        ) + "#tab-0-3-open"
-        return ctx
-
     def get_success_url(self) -> str:
         return reverse(
             "plugins:pretix_zugferd:settings",
