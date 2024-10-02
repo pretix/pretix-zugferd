@@ -4,9 +4,10 @@
 {% block inside %}
     <h1>{% trans "ZUGFeRD" %}</h1>
     <div class="alert alert-info">
-        {% blocktrans trimmed %}
-            If you want to use the XRechnung profile, you should make use of the "custom field" option in invoice settings
-            for the buyer reference ID.
+        {% url "control:event.settings.invoice" event=request.event.slug organizer=request.organizer.slug as settings_url %}
+        {% blocktrans trimmed with settings_url=settings_url|add:"#tab-0-3-open" %}
+            If you want to use the XRechnung profile, you should make use of the "custom recipient field" in invoice settings
+            for the buyer reference ID. Also make sure to use a compatible invoice layout (+ ZUGFeRD) in your <a href="{{ settings_url }}">invoice settings</a>.
         {% endblocktrans %}
     </div>
     <form action="" method="post" class="form-horizontal" enctype="multipart/form-data">
