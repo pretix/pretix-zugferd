@@ -77,7 +77,7 @@ class ZugferdMixin:
                 category = "S"  # Standard rate
             li.document.line_id = str(line.position + 1)
             desc = remove_control_characters(
-                bleach.clean(line.description.replace("<br />", "\n"), tags=[])
+                bleach.clean(line.description.replace("<br />", "\n"), tags=set())
             )
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
