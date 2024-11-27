@@ -15,7 +15,7 @@ class PluginApp(AppConfig):
         visible = True
         version = __version__
         category = "FEATURE"
-        compatibility = "pretix>=4.13.0"
+        compatibility = "pretix>=2024.11.0.dev0"
 
         @property
         def description(self):
