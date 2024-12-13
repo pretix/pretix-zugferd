@@ -58,7 +58,15 @@ class ZugferdMixin:
             factor = -1 if line.gross_value < 0 else 1
             li = LineItem()
             exemption_reason = None
-            if line.tax_rate == Decimal("0.00"):
+
+            if line.tax_code:
+                if "/" in line.tax_code:
+                    category, reason = line.tax_code.split("/", 1)
+                else:
+                    category, reason = line.tax_code, None
+                if category == "E" and reason:
+                    exemption_reason = reason
+            elif line.tax_rate == Decimal("0.00"):
                 if invoice.reverse_charge:
                     category = "AE"  # Reverse charge
                 elif (
@@ -74,7 +82,7 @@ class ZugferdMixin:
                         "zugferd", "See invoice notes for more information"
                     )
             else:
-                category = "S"  # Standard rate
+                category = "S"  # Assume standard rate
             li.document.line_id = str(line.position + 1)
             desc = remove_control_characters(
                 bleach.clean(line.description.replace("<br />", "\n"), tags=set())
