@@ -17,7 +17,6 @@ from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
 from drafthorse.models.party import TaxRegistration, URIUniversalCommunication
 from drafthorse.models.payment import PaymentTerms
-from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
@@ -49,7 +48,7 @@ class ZugferdMixin:
         cc = invoice.event.currency
         doc = Document()
         if self.profile == "EXTENDED":
-            doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
+            doc.context.test_indicator = invoice.invoice_no == "PREVIEW" or invoice.order.testmode
             doc.header.name = "RECHNUNG"
             doc.header.languages.add(invoice.locale[:2])
         if self.business_process_id:
