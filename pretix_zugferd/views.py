@@ -4,9 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from phonenumber_field.formfields import PhoneNumberField
 from pretix.base.forms import SettingsForm
 from pretix.base.models import Event
-from pretix.control.views.event import (
-    EventSettingsFormView, EventSettingsViewMixin,
-)
+from pretix.control.views.event import EventSettingsFormView, EventSettingsViewMixin
 
 
 class ZugferdSettingsForm(SettingsForm):

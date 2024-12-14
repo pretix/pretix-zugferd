@@ -3,8 +3,14 @@ from datetime import datetime
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from i18nfield.strings import LazyI18nString
-
-from pretix.base.models import Event, Organizer, Order, OrderPosition, InvoiceAddress, OrderPayment
+from pretix.base.models import (
+    Event,
+    InvoiceAddress,
+    Order,
+    OrderPayment,
+    OrderPosition,
+    Organizer,
+)
 from pytz import UTC
 
 

@@ -1,8 +1,7 @@
-import re
-
 import bleach
 import logging
 import os
+import re
 import subprocess
 import tempfile
 import unicodedata
@@ -48,7 +47,9 @@ class ZugferdMixin:
         cc = invoice.event.currency
         doc = Document()
         if self.profile == "EXTENDED":
-            doc.context.test_indicator = invoice.invoice_no == "PREVIEW" or invoice.order.testmode
+            doc.context.test_indicator = (
+                invoice.invoice_no == "PREVIEW" or invoice.order.testmode
+            )
             doc.header.name = "RECHNUNG"
             doc.header.languages.add(invoice.locale[:2])
         if self.business_process_id:
@@ -100,13 +101,9 @@ class ZugferdMixin:
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
             # For negative amounts, only the billed quantity may be negative, not the base price per quantity
-            li.agreement.gross.amount = abs(line.net_value).quantize(
-                Decimal("0.0001")
-            )
+            li.agreement.gross.amount = abs(line.net_value).quantize(Decimal("0.0001"))
             li.agreement.gross.basis_quantity = (Decimal("1.0000"), "C62")
-            li.agreement.net.amount = abs(line.net_value).quantize(
-                Decimal("0.0001")
-            )
+            li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
             li.agreement.net.basis_quantity = (Decimal("1.0000"), "C62")
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
             li.settlement.trade_tax.type_code = "VAT"
@@ -204,17 +201,17 @@ class ZugferdMixin:
             )
 
         # Autodetect German "Leitweg-ID"
-        if str(invoice.invoice_to_country) == "DE" and invoice.custom_field and self.re_leitweg_id.match(invoice.custom_field):
+        if (
+            str(invoice.invoice_to_country) == "DE"
+            and invoice.custom_field
+            and self.re_leitweg_id.match(invoice.custom_field)
+        ):
             doc.trade.agreement.seller.electronic_address.add(
-                URIUniversalCommunication(
-                    uri_ID=("0204", invoice.custom_field)
-                )
+                URIUniversalCommunication(uri_ID=("0204", invoice.custom_field))
             )
         elif invoice.order.email:
             doc.trade.agreement.seller.electronic_address.add(
-                URIUniversalCommunication(
-                    uri_ID=("EM", invoice.order.email)
-                )
+                URIUniversalCommunication(uri_ID=("EM", invoice.order.email))
             )
 
         if invoice.invoice_to_vat_id:
@@ -282,8 +279,8 @@ class ZugferdMixin:
             note.content.add(
                 remove_control_characters(
                     " / ".join(
-                        line for line in
-                        invoice.additional_text.split("<br />")
+                        line
+                        for line in invoice.additional_text.split("<br />")
                         if line.split()
                     )
                 )
@@ -345,7 +342,9 @@ class ZugferdMixin:
         doc.trade.settlement.terms.add(pt)
 
         if invoice.is_cancellation:
-            doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = invoice.refers.number
+            doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = (
+                invoice.refers.number
+            )
             # todo: doc.trade.settlement.invoice_referenced_document.date_time_string = invoice.refers.date
 
         taxtotal = Decimal(0)
@@ -380,18 +379,16 @@ class ZugferdMixin:
             canvas.rotate(90)
             canvas.setFont("OpenSansBd", 8)
             canvas.setFillColorRGB(80 / 255, 161 / 255, 103 / 255)
-            canvas.drawString(
-                0, 0, _("eInvoice included")
-            )
+            canvas.drawString(0, 0, _("eInvoice included"))
             canvas.restoreState()
 
     def generate(self, invoice):
         self.__zugferd = True
         self.invoice = invoice
         if (
-                not invoice.invoice_from_name
-                or not invoice.invoice_to_country
-                or not invoice.invoice_from_country
+            not invoice.invoice_from_name
+            or not invoice.invoice_to_country
+            or not invoice.invoice_from_country
         ):
             self.__zugferd = False
         elif str(invoice.invoice_to_country) in settings.COUNTRIES_OVERRIDE:
@@ -406,7 +403,9 @@ class ZugferdMixin:
             except Exception:
                 self.__zugferd = False
                 logger.exception(
-                    "Could not generate ZUGFeRD data for invoice {}".format(invoice.number)
+                    "Could not generate ZUGFeRD data for invoice {}".format(
+                        invoice.number
+                    )
                 )
 
         fname, ftype, content = super().generate(invoice)
@@ -467,7 +466,9 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd_xrechnung"
     profile = "XRECHNUNG"
     schema = "EN16931"
-    guideline_id = "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0"
+    guideline_id = (
+        "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0"
+    )
     business_process_id = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
     verbose_name = lazy(
         lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(

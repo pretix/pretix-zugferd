@@ -1,8 +1,7 @@
 import os
 from difflib import unified_diff
-from xml.dom import minidom
-
 from drafthorse.utils import validate_xml
+from xml.dom import minidom
 
 
 def diff_xml(a, b):

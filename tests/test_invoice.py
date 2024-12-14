@@ -1,17 +1,20 @@
 import json
 import os
-from decimal import Decimal
-
 import pytest
+from decimal import Decimal
 from django_scopes import scopes_disabled
+from pretix.base.services.invoices import (
+    generate_cancellation,
+    generate_invoice,
+    invoice_pdf_task,
+)
 from pypdf import PdfReader
 
-from pretix.base.services.invoices import generate_invoice, invoice_pdf_task, generate_cancellation
 from .utils import compare
 
 
 def r(fname):
-    with open(os.path.join(os.path.dirname(__file__) + '/results/', fname), 'rb') as f:
+    with open(os.path.join(os.path.dirname(__file__) + "/results/", fname), "rb") as f:
         return f.read()
 
 
@@ -106,9 +109,9 @@ def test_tax_code_exempt(event, order, tax_rule):
 @pytest.mark.django_db
 @scopes_disabled()
 def test_reverse_charge(event, order, tax_rule):
-    tax_rule.custom_rules = json.dumps([
-        {'country': 'DE', 'address_type': '', 'action': 'reverse'}
-    ])
+    tax_rule.custom_rules = json.dumps(
+        [{"country": "DE", "address_type": "", "action": "reverse"}]
+    )
     tax_rule.save()
     op = order.positions.first()
     op._calculate_tax()
@@ -126,9 +129,9 @@ def test_reverse_charge(event, order, tax_rule):
 @pytest.mark.django_db
 @scopes_disabled()
 def test_guess_tax_code(event, order, tax_rule):
-    tax_rule.custom_rules = json.dumps([
-        {'country': 'AU', 'address_type': '', 'action': 'no'}
-    ])
+    tax_rule.custom_rules = json.dumps(
+        [{"country": "AU", "address_type": "", "action": "no"}]
+    )
     tax_rule.code = None
     tax_rule.save()
     ia = order.invoice_address
