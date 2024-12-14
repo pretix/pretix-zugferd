@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rsm:CrossIndustryInvoice xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
+                          xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
+                          xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+    <rsm:ExchangedDocumentContext>
+        <ram:TestIndicator>
+            <udt:Indicator>false</udt:Indicator>
+        </ram:TestIndicator>
+        <ram:GuidelineSpecifiedDocumentContextParameter>
+            <ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID>
+        </ram:GuidelineSpecifiedDocumentContextParameter>
+    </rsm:ExchangedDocumentContext>
+    <rsm:ExchangedDocument>
+        <ram:ID>DUMMY-00001</ram:ID>
+        <ram:Name>RECHNUNG</ram:Name>
+        <ram:TypeCode>380</ram:TypeCode>
+        <ram:IssueDateTime>
+            <udt:DateTimeString format="102">20241214</udt:DateTimeString>
+        </ram:IssueDateTime>
+        <ram:LanguageID>en</ram:LanguageID>
+        <ram:IncludedNote>
+            <ram:Content>Order code: DUMMY-FOO</ram:Content>
+        </ram:IncludedNote>
+        <ram:IncludedNote>
+            <ram:Content>Dummy - Dec. 27, 2017, 10 a.m.</ram:Content>
+        </ram:IncludedNote>
+        <ram:IncludedNote>
+            <ram:Content>Customer reference: PO-12345</ram:Content>
+        </ram:IncludedNote>
+        <ram:IncludedNote>
+            <ram:Content>Intro-Text</ram:Content>
+        </ram:IncludedNote>
+        <ram:IncludedNote>
+            <ram:Content>Additional Text</ram:Content>
+        </ram:IncludedNote>
+        <ram:IncludedNote>
+            <ram:Content>Footer-Text</ram:Content>
+        </ram:IncludedNote>
+    </rsm:ExchangedDocument>
+    <rsm:SupplyChainTradeTransaction>
+        <ram:IncludedSupplyChainTradeLineItem>
+            <ram:AssociatedDocumentLineDocument>
+                <ram:LineID>1</ram:LineID>
+            </ram:AssociatedDocumentLineDocument>
+            <ram:SpecifiedTradeProduct>
+                <ram:Name>Ticket</ram:Name>
+                <ram:Description>Ticket
+Attendee: Peter</ram:Description>
+            </ram:SpecifiedTradeProduct>
+            <ram:SpecifiedLineTradeAgreement>
+                <ram:GrossPriceProductTradePrice>
+                    <ram:ChargeAmount>19.3300</ram:ChargeAmount>
+                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                </ram:GrossPriceProductTradePrice>
+                <ram:NetPriceProductTradePrice>
+                    <ram:ChargeAmount>19.3300</ram:ChargeAmount>
+                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                </ram:NetPriceProductTradePrice>
+            </ram:SpecifiedLineTradeAgreement>
+            <ram:SpecifiedLineTradeDelivery>
+                <ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity>
+            </ram:SpecifiedLineTradeDelivery>
+            <ram:SpecifiedLineTradeSettlement>
+                <ram:ApplicableTradeTax>
+                    <ram:TypeCode>VAT</ram:TypeCode>
+                    <ram:CategoryCode>S</ram:CategoryCode>
+                    <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+                </ram:ApplicableTradeTax>
+                <ram:SpecifiedTradeSettlementLineMonetarySummation>
+                    <ram:LineTotalAmount>19.33</ram:LineTotalAmount>
+                </ram:SpecifiedTradeSettlementLineMonetarySummation>
+            </ram:SpecifiedLineTradeSettlement>
+        </ram:IncludedSupplyChainTradeLineItem>
+        <ram:ApplicableHeaderTradeAgreement>
+            <ram:SellerTradeParty>
+                <ram:Name>Musterfirma</ram:Name>
+                <ram:PostalTradeAddress>
+                    <ram:PostcodeCode>12345</ram:PostcodeCode>
+                    <ram:LineOne>Baker Street 221B</ram:LineOne>
+                    <ram:CityName>Berlin</ram:CityName>
+                    <ram:CountryID>DE</ram:CountryID>
+                </ram:PostalTradeAddress>
+                <ram:URIUniversalCommunication>
+                    <ram:URIID schemeID="0204">9123-1234561-23</ram:URIID>
+                </ram:URIUniversalCommunication>
+                <ram:SpecifiedTaxRegistration>
+                    <ram:ID schemeID="FC">123/456/789</ram:ID>
+                </ram:SpecifiedTaxRegistration>
+                <ram:SpecifiedTaxRegistration>
+                    <ram:ID schemeID="VA">DE123456789</ram:ID>
+                </ram:SpecifiedTaxRegistration>
+            </ram:SellerTradeParty>
+            <ram:BuyerTradeParty>
+                <ram:Name>Kundenfirma</ram:Name>
+                <ram:PostalTradeAddress>
+                    <ram:PostcodeCode>54321</ram:PostcodeCode>
+                    <ram:LineOne>Peter</ram:LineOne>
+                    <ram:LineTwo>Sesamstra&#223;e 123</ram:LineTwo>
+                    <ram:CityName>Bielefeld</ram:CityName>
+                    <ram:CountryID>DE</ram:CountryID>
+                </ram:PostalTradeAddress>
+                <ram:SpecifiedTaxRegistration>
+                    <ram:ID schemeID="VA">DE987654321</ram:ID>
+                </ram:SpecifiedTaxRegistration>
+            </ram:BuyerTradeParty>
+        </ram:ApplicableHeaderTradeAgreement>
+        <ram:ApplicableHeaderTradeDelivery/>
+        <ram:ApplicableHeaderTradeSettlement>
+            <ram:PaymentReference>DUMMY-FOO</ram:PaymentReference>
+            <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+            <ram:SpecifiedTradeSettlementPaymentMeans>
+                <ram:TypeCode>30</ram:TypeCode>
+                <ram:PayeePartyCreditorFinancialAccount>
+                    <ram:IBANID>DE1234567890</ram:IBANID>
+                </ram:PayeePartyCreditorFinancialAccount>
+                <ram:PayeeSpecifiedCreditorFinancialInstitution>
+                    <ram:BICID>GENODEMDEMO</ram:BICID>
+                </ram:PayeeSpecifiedCreditorFinancialInstitution>
+            </ram:SpecifiedTradeSettlementPaymentMeans>
+            <ram:ApplicableTradeTax>
+                <ram:CalculatedAmount>3.67</ram:CalculatedAmount>
+                <ram:TypeCode>VAT</ram:TypeCode>
+                <ram:BasisAmount>19.33</ram:BasisAmount>
+                <ram:CategoryCode>S</ram:CategoryCode>
+                <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+            </ram:ApplicableTradeTax>
+            <ram:SpecifiedTradePaymentTerms>
+                <ram:DueDateDateTime>
+                    <udt:DateTimeString format="102">20241210</udt:DateTimeString>
+                </ram:DueDateDateTime>
+            </ram:SpecifiedTradePaymentTerms>
+            <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+                <ram:LineTotalAmount>19.33</ram:LineTotalAmount>
+                <ram:ChargeTotalAmount>0.00</ram:ChargeTotalAmount>
+                <ram:AllowanceTotalAmount>0.00</ram:AllowanceTotalAmount>
+                <ram:TaxBasisTotalAmount>19.33</ram:TaxBasisTotalAmount>
+                <ram:TaxTotalAmount currencyID="EUR">3.67</ram:TaxTotalAmount>
+                <ram:GrandTotalAmount>23.00</ram:GrandTotalAmount>
+                <ram:DuePayableAmount>23.00</ram:DuePayableAmount>
+            </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+        </ram:ApplicableHeaderTradeSettlement>
+    </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>

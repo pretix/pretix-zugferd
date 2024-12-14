@@ -281,7 +281,11 @@ class ZugferdMixin:
             note = IncludedNote()
             note.content.add(
                 remove_control_characters(
-                    invoice.additional_text.replace("<br />", " / ")
+                    " / ".join(
+                        line for line in
+                        invoice.additional_text.split("<br />")
+                        if line.split()
+                    )
                 )
             )
             doc.header.notes.add(note)
