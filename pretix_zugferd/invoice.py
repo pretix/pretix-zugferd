@@ -1,3 +1,5 @@
+import re
+
 import bleach
 import logging
 import os
@@ -13,7 +15,7 @@ from django.utils.translation import gettext as _, pgettext
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
-from drafthorse.models.party import TaxRegistration
+from drafthorse.models.party import TaxRegistration, URIUniversalCommunication
 from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.references import AdditionalReferencedDocument
 from drafthorse.models.tradelines import LineItem
@@ -38,6 +40,10 @@ class ZugferdMixin:
     profile = "EXTENDED"
     schema = "EXTENDED"
     guideline_id = "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
+    business_process_id = None
+
+    # as per https://xeinkauf.de/app/uploads/2022/11/Leitweg-ID-Formatspezifikation-v2-0-2-1.pdf
+    re_leitweg_id = re.compile(r"^[019][0-9]{1,11}-[0-9A-Z]{1,30}-[0-9]{2}$")
 
     def _zugferd_generate_document(self, invoice):
         cc = invoice.event.currency
@@ -46,6 +52,8 @@ class ZugferdMixin:
             doc.context.test_indicator = invoice.invoice_no == "PREVIEW"
             doc.header.name = "RECHNUNG"
             doc.header.languages.add(invoice.locale[:2])
+        if self.business_process_id:
+            doc.context.business_parameter.id = self.business_process_id
         doc.context.guideline_parameter.id = self.guideline_id
         doc.header.id = invoice.number
         # ZUGFeRD allows cancellations to be either
@@ -155,6 +163,17 @@ class ZugferdMixin:
             doc.trade.agreement.seller.contact.email.address = (
                 invoice.event.settings.zugferd_seller_contact_email
             )
+            doc.trade.agreement.buyer.electronic_adress.add(
+                URIUniversalCommunication(
+                    uri_ID=("EM", invoice.event.settings.zugferd_seller_contact_email)
+                )
+            )
+        elif invoice.event.settings.contact_mail:
+            doc.trade.agreement.buyer.electronic_adress.add(
+                URIUniversalCommunication(
+                    uri_ID=("EM", invoice.event.settings.contact_mail)
+                )
+            )
         if invoice.event.settings.zugferd_seller_contact_phone:
             doc.trade.agreement.seller.contact.telephone.number = (
                 invoice.event.settings.zugferd_seller_contact_phone
@@ -183,6 +202,20 @@ class ZugferdMixin:
         if str(invoice.invoice_to_country)[0] != "X":
             doc.trade.agreement.buyer.address.country_id = remove_control_characters(
                 str(invoice.invoice_to_country)
+            )
+
+        # Autodetect German "Leitweg-ID"
+        if str(invoice.invoice_to_country) == "DE" and invoice.custom_field and self.re_leitweg_id.match(invoice.custom_field):
+            doc.trade.agreement.seller.electronic_adress.add(
+                URIUniversalCommunication(
+                    uri_ID=("0204", invoice.custom_field)
+                )
+            )
+        elif invoice.order.email:
+            doc.trade.agreement.seller.electronic_adress.add(
+                URIUniversalCommunication(
+                    uri_ID=("EM", invoice.order.email)
+                )
             )
 
         if invoice.invoice_to_vat_id:
@@ -309,10 +342,8 @@ class ZugferdMixin:
         doc.trade.settlement.terms.add(pt)
 
         if invoice.is_cancellation:
-            ref = AdditionalReferencedDocument()
-            ref.issuer_assigned_id = invoice.refers.number
-            ref.date_time_string = invoice.refers.date
-            ref.type_code = "AWR"
+            doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = invoice.refers.number
+            # todo: doc.trade.settlement.invoice_referenced_document.date_time_string = invoice.refers.date
 
         taxtotal = Decimal(0)
         for idx, gross in grossvalue_map.items():
@@ -433,9 +464,8 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd_xrechnung"
     profile = "XRECHNUNG"
     schema = "EN16931"
-    guideline_id = (
-        "urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.2"
-    )
+    guideline_id = "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0"
+    business_process_id = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
     verbose_name = lazy(
         lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(
             Modern1Renderer.verbose_name
