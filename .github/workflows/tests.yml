@@ -29,7 +29,7 @@ jobs:
       - name: Install system dependencies
         run: sudo apt update && sudo apt install gettext
       - name: Install pretix
-        run: pip3 install pretix
+        run: pip3 install "git+https://github.com/pretix/pretix@master#egg=pretix"
       - name: Install Dependencies
         run: pip3 install pytest pytest-django -Ue .
       - name: Run checks
