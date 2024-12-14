@@ -1,4 +1,3 @@
-import os
 from difflib import unified_diff
 from drafthorse.utils import validate_xml
 from xml.dom import minidom
