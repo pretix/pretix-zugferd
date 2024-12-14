@@ -27,7 +27,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install system dependencies
-        run: sudo apt update && sudo apt install gettext
+        run: sudo apt update && sudo apt install -y gettext ghostscript
       - name: Install pretix
         run: pip3 install "git+https://github.com/pretix/pretix@master#egg=pretix"
       - name: Install Dependencies
