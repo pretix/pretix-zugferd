@@ -48,7 +48,10 @@ class ZugferdMixin:
             doc.header.languages.add(invoice.locale[:2])
         doc.context.guideline_parameter.id = self.guideline_id
         doc.header.id = invoice.number
-        doc.header.type_code = "380"
+        # ZUGFeRD allows cancellations to be either
+        # - Type 381 with positive values or
+        # - Type 380 or 384 with negative values (chosen here)
+        doc.header.type_code = "384" if invoice.is_cancellation else "380"
         doc.header.issue_date_time = invoice.date
         # ITEMS
         taxvalue_map = defaultdict(Decimal)
@@ -89,21 +92,22 @@ class ZugferdMixin:
             )
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
-            li.agreement.gross.amount = (line.net_value * factor).quantize(
+            # For negative amounts, only the billed quantity may be negative, not the base price per quantity
+            li.agreement.gross.amount = abs(line.net_value).quantize(
                 Decimal("0.0001")
             )
-            li.agreement.gross.basis_quantity = (Decimal("1.0000") * factor, "C62")
-            li.agreement.net.amount = (line.net_value * factor).quantize(
+            li.agreement.gross.basis_quantity = (Decimal("1.0000"), "C62")
+            li.agreement.net.amount = abs(line.net_value).quantize(
                 Decimal("0.0001")
             )
-            li.agreement.net.basis_quantity = (Decimal("1.0000") * factor, "C62")
+            li.agreement.net.basis_quantity = (Decimal("1.0000"), "C62")
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
             li.settlement.trade_tax.type_code = "VAT"
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
             if exemption_reason:
                 li.settlement.trade_tax.exemption_reason = exemption_reason
-            li.settlement.monetary_summation.total_amount = line.net_value * factor
+            li.settlement.monetary_summation.total_amount = line.net_value
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
             grossvalue_map[
