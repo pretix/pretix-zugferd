@@ -3,6 +3,8 @@ import os
 import pytest
 from decimal import Decimal
 from django_scopes import scopes_disabled
+from freezegun import freeze_time
+
 from pretix.base.services.invoices import (
     generate_cancellation,
     generate_invoice,
@@ -20,6 +22,7 @@ def r(fname):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_render_default_zugferd(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
@@ -33,6 +36,7 @@ def test_render_default_zugferd(event, order):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_no_zugferd_without_seller_country(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     del event.settings.invoice_address_from_country
@@ -45,6 +49,7 @@ def test_no_zugferd_without_seller_country(event, order):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_no_zugferd_without_buyer_country(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     ia = order.invoice_address
@@ -59,6 +64,7 @@ def test_no_zugferd_without_buyer_country(event, order):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_no_zugferd_without_supported_buyer_country(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     ia = order.invoice_address
@@ -73,6 +79,7 @@ def test_no_zugferd_without_supported_buyer_country(event, order):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_render_default_xrechnung(event, order):
     event.settings.invoice_renderer = "modern1_zugferd_xrechnung"
     event.settings.zugferd_seller_contact_name = "Max Muster"
@@ -89,6 +96,7 @@ def test_render_default_xrechnung(event, order):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_tax_code_exempt(event, order, tax_rule):
     tax_rule.code = "E/VATEX-EU-79-C"
     tax_rule.rate = Decimal("0.00")
@@ -108,6 +116,7 @@ def test_tax_code_exempt(event, order, tax_rule):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_reverse_charge(event, order, tax_rule):
     tax_rule.custom_rules = json.dumps(
         [{"country": "DE", "address_type": "", "action": "reverse"}]
@@ -128,6 +137,7 @@ def test_reverse_charge(event, order, tax_rule):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_guess_tax_code(event, order, tax_rule):
     tax_rule.custom_rules = json.dumps(
         [{"country": "AU", "address_type": "", "action": "no"}]
@@ -153,6 +163,7 @@ def test_guess_tax_code(event, order, tax_rule):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_delivery_date(event, order, tax_rule):
     event.settings.zugferd_include_delivery_date = True
     event.settings.invoice_renderer = "modern1_zugferd"
@@ -167,6 +178,7 @@ def test_delivery_date(event, order, tax_rule):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_paid(event, order, tax_rule):
     event.settings.invoice_renderer = "modern1_zugferd"
     order.payments.first().confirm()
@@ -181,6 +193,7 @@ def test_paid(event, order, tax_rule):
 
 @pytest.mark.django_db
 @scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
 def test_cancellation(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)

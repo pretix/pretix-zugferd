@@ -31,6 +31,6 @@ jobs:
       - name: Install pretix
         run: pip3 install "git+https://github.com/pretix/pretix@master#egg=pretix"
       - name: Install Dependencies
-        run: pip3 install pytest pytest-django -Ue .
+        run: pip3 install pytest pytest-django freezegun -Ue .
       - name: Run checks
         run: py.test tests
