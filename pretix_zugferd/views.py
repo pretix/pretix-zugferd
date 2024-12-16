@@ -57,10 +57,10 @@ class SettingsView(EventSettingsViewMixin, EventSettingsFormView):
             is_zugferd_renderer=isinstance(
                 self.request.event.invoice_renderer, ZugferdMixin
             ),
-            is_xrechnung_renderer=getattr(
-                self.request.event.invoice_renderer, "profile", None
-            )
-            == "XRECHNUNG",
+            is_xrechnung_renderer=(
+                getattr(self.request.event.invoice_renderer, "profile", None)
+                == "XRECHNUNG"
+            ),
             has_leitweg_id=(
                 self.request.event.settings.invoice_address_custom_field.localize("de")
                 and "leitweg"
