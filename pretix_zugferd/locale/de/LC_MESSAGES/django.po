@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-12 16:14+0100\n"
+"POT-Creation-Date: 2024-12-16 13:41+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Raphael Michel <michel@rami.io>\n"
 "Language-Team: \n"
@@ -10,13 +10,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
-#: pretix_zugferd/__init__.py:11
-msgid "ZUGFeRD invoices for pretix"
-msgstr "ZUGFeRD-Rechnungen für pretix"
+#: pretix_zugferd/apps.py:13
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:5
+msgid "ZUGFeRD invoices"
+msgstr "ZUGFeRD-Rechnungen"
 
-#: pretix_zugferd/__init__.py:18
+#: pretix_zugferd/apps.py:23
 msgid ""
 "This plugin provides an invoice renderer that annotates pretix invoices with "
 "ZUGFeRD data, a structured data format for invoices used in Germany."
@@ -25,29 +26,17 @@ msgstr ""
 "Rechnungen mit ZUGFeRD-Daten bereichert werden, einem Format für "
 "strukturierte Rechnungen in Deutschland."
 
-#: pretix_zugferd/__init__.py:22
-msgid ""
-"Note: Use this plugin at your own risk. If there is a semantic difference "
-"between the XML and PDF contents in your ZUGFeRD invoices, you might legally "
-"owe the VAT to the financial authorities twice, since you then legally sent "
-"two invoices. We tried our best to avoid this, but we do not assume any "
-"liability. Please check the output of this plugin with your tax or legal "
-"attorney before use."
-msgstr ""
-"Vorsicht: Benutzen Sie diese Erweiterung auf eigene Gefahr. Im Falle eines "
-"semantischen Unterschieds zwischen den PDF- und XML-Inhalten einer ZUGFeRD-"
-"Rechnung kann die Umsatzsteuer dem Finanzamt streng genommen doppelt "
-"geschuldet werden, da rechtlich zwei verschiedene Rechnungen vorliegen. Wir "
-"bemühen uns sehr, solche Abweichungen zu vermeiden, aber übernehmen keine "
-"Haftung. Bitte lassen Sie die Ausgabe der Rechnungen im Zweifel durch Ihren "
-"Steuerberater prüfen."
+#: pretix_zugferd/invoice.py:93
+msgctxt "zugferd"
+msgid "See invoice notes for more information"
+msgstr "Weitere Informationen siehe Freitext-Notizen"
 
-#: pretix_zugferd/invoice.py:72
+#: pretix_zugferd/invoice.py:234
 #, python-brace-format
 msgid "Order code: {code}"
 msgstr "Rechnungsnummer: {code}"
 
-#: pretix_zugferd/invoice.py:78
+#: pretix_zugferd/invoice.py:242
 #, python-brace-format
 msgctxt "invoice"
 msgid ""
@@ -57,8 +46,372 @@ msgstr ""
 "{from_date}\n"
 "bis {to_date}"
 
-#: pretix_zugferd/invoice.py:95
+#: pretix_zugferd/invoice.py:262
 #, python-brace-format
 msgctxt "invoice"
 msgid "Customer reference: {reference}"
 msgstr "Kundenseitige Referenz: {reference}"
+
+#: pretix_zugferd/invoice.py:382
+msgid "eInvoice included"
+msgstr "E-Rechnung enthalten"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:7
+msgid "Configuration check"
+msgstr "Konfigurationsprüfung"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:9
+msgid ""
+"We've checked the configuration of your event for compatibility with ZUGFeRD "
+"invoices and found the result shown in the following table. Note that this "
+"check can only cover usual cases and it is ultimately your responsibility "
+"that the resulting ZUGFeRD invoices comply with all regulations they might "
+"need to. ZUGFeRD invoices need to be machine-readable. This also means that "
+"all important information on the invoice must only be in the pre-defined "
+"fields and information included in unstructured text should not conflict "
+"with the structured information."
+msgstr ""
+"Wir haben die Konfiguration Ihrer Veranstaltung auf Kompatibilität mit "
+"ZUGFeRD-Rechnungen überprüft. Das Ergebnis finden Sie in der untenstehenden "
+"Tabelle. Bitte beachten Sie, dass dieser Test nur übliche Fälle "
+"berücksichtigen kann und es letzten Endes Ihre Verantwortung ist, dass die "
+"erstellten ZUGFeRD-Rechnungen allen notwendigen Regularien entsprechen. "
+"ZUGFeRD-Rechnungen müssen maschinenlesbar sein. Das heißt auch, dass alle "
+"wichtigen Informationen der Rechnung in den entsprechend definierten Feldern "
+"ausgewiesen sein müssen und Inhalte von unstrukturierten Textfeldern nicht "
+"im Widerspruch mit den strukturierten Informationen stehen dürfen."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:19
+msgid ""
+"We recommend inspecting a sample invoice with one of the many available "
+"validation tools and discussing the results with your tax accountant to make "
+"sure you are fully in compliance with tax regulations. Note that some "
+"invoice recipients, such as government customers, might impose stricter "
+"requirements than what is required by tax law."
+msgstr ""
+"Wir empfehlen, eine Beispielrechnung mit einem der vielen verfügbaren "
+"Validierungstools zu testen und die Ergebnisse mit Ihrem Steuerberater zu "
+"besprechen, um sicherzugehen, dass alle steuerlichen Vorschriften "
+"eingehalten sind. Beachten Sie auch, dass manche Rechnungsempfänger (z.B. "
+"Behörden) ggf. strengere Anforderungen an die Rechnungen haben als das "
+"Steuerrecht."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:29
+msgid "Setting"
+msgstr "Einstellung"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:30
+msgid "Status"
+msgstr "Status"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:35
+msgid "Invoice generation"
+msgstr "Rechnungserstellung"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:39
+msgid "Invoice generation is not enabled for your event."
+msgstr "Rechnungserstellung ist für Ihre Veranstaltung deaktiviert."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:40
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:57
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:74
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:108
+msgid "ZUGFeRD invoices cannot be created."
+msgstr "ZUGFeRD-Rechnungen können nicht erstellt werden."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:43
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:60
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:77
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:94
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:111
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:119
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:136
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:154
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:175
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:195
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:215
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:232
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:240
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:257
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:265
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:283
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:292
+msgid "Change"
+msgstr "Ändern"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:47
+msgid "Invoice generation is enabled."
+msgstr "Rechnungserstellung ist aktiviert."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:52
+msgid "Invoice style"
+msgstr "Rechnungs-Layout"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:56
+msgid "You have not selected a ZUGFeRD-enabled invoice renderer."
+msgstr "Sie haben kein Rechnungs-Layout mit ZUGFeRD-Unterstützung ausgewählt."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:64
+msgid "A ZUGFeRD-enabled invoice renderer is active."
+msgstr "Ein Rechnungs-Layout mit ZUGFeRD-Unterstützung ist aktiv."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:69
+msgid "Seller address"
+msgstr "Adresse des Verkäufers"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:73
+msgid "No country is set for the invoice sender address."
+msgstr "Kein Land ist für die Absenderadresse der Rechnung gesetzt."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:81
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:98
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:123
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:140
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:199
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:219
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:244
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:269
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:296
+msgid "Configuration is set."
+msgstr "Konfiguration ist gesetzt."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:86
+msgid "Seller VAT ID"
+msgstr "USt-ID des Verkäufers"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:90
+msgid "Your VAT ID is not set."
+msgstr "Ihre USt-ID ist nicht konfiguriert."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:91
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:133
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:229
+msgid ""
+"ZUGFeRD invoices can be created, but will likely be rejected as invalid."
+msgstr ""
+"ZUGFeRD-Rechnungen können erstellt werden, aber werden vermutlich als "
+"ungültig zurückgewiesen."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:103
+msgid "Invoice addresses"
+msgstr "Rechnungsadressen"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:107
+msgid "Invoice addresses are not asked."
+msgstr "Rechnungsadressen werden nicht erfasst."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:115
+msgid "Invoice addresses are not required."
+msgstr "Rechnungsadressen sind nicht erforderlich."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:116
+msgid "ZUGFeRD invoices can only be created if an invoice address is entered."
+msgstr ""
+"ZUGFeRD-Rechnungen können nur erstellt werden, wenn eine Rechnungsadresse "
+"eingegeben wird."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:128
+msgid "VAT IDs"
+msgstr "USt-IDs"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:132
+msgid "Customers cannot enter a VAT ID."
+msgstr "Kunden können keine USt-ID eingeben."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:145
+msgid "Beneficiary"
+msgstr "Leistungsempfänger"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:149
+msgid ""
+"You have enabled the option to allow customers to name a different "
+"beneficiary."
+msgstr ""
+"Sie haben die Option zur Eingabe eines abweichenden Leistungsempfängers "
+"aktiviert."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:150
+msgid ""
+"This is not currently supported by this module and the beneficiary will not "
+"be included in the XML part of the ZUGFeRD invoice."
+msgstr ""
+"Dies wird derzeit vom ZUGFeRD-Modul nicht unterstützt. Die Angaben zum "
+"abweichenden Leistungsempfänger sind im XML-Teil der ZUGFeRD-Rechnung nicht "
+"enthalten."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:151
+msgid "We recommend disabling this option."
+msgstr "Wir empfehlen, diese Option zu deaktivieren."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:158
+msgid "Configuration is not set."
+msgstr "Konfiguration ist nicht gesetzt."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:163
+msgid "Custom texts"
+msgstr "Eigene Texte"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:167
+msgid ""
+"You have entered content in the individual invoice text fields. The texts "
+"will be included in the electronic invoice as well, but be aware that a "
+"customer who processes the electronic invoices automatically might not take "
+"them into account. Make sure they do not include vital details on payment or "
+"taxation matters."
+msgstr ""
+"Sie haben eigene Texte zum Aufdruck auf der Rechnung eingegeben. Diese Texte "
+"werden in der elektronischen Rechnung ebenfalls enthalten sein, aber "
+"beachten Sie bitte, dass ein Kunde, der die Rechnung vollautomatisch "
+"verarbeitet, diese Texte möglicherweise ignoriert. Die Texte sollten daher "
+"keine wichtigen Infos zu Steuern oder Zahlungen enthalten."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:179
+msgid "No custom texts used."
+msgstr "Keine eigenen Texte verwendet."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:184
+msgid "Footer text"
+msgstr "Fußzeilen-Text"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:188
+msgid ""
+"You have not entered a footer text. Make sure your invoice contains all "
+"relevant regulatory information (e.g. registration numbers, management "
+"board) on both the PDF and XML part of the ZUGFeRD invoice."
+msgstr ""
+"Sie haben keinen Text für die Fußzeile eingegeben. Stellen Sie sicher, dass "
+"Ihre Rechnungen alle regulatorischen Angaben (z.B. Handelsregisternummer, "
+"Geschäftsführung) sowohl im PDF- als auch XML-Teil der ZUGFeRD-Rechnung "
+"enthalten."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:204
+msgid "Payment deadline"
+msgstr "Zahlungsfrist"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:208
+msgid ""
+"You have configured invoices not to show the payment deadline. ZUGFeRD "
+"invoices will, however, always include the payment deadline in the XML part, "
+"so we recommend showing it on the PDF part as well."
+msgstr ""
+"Sie haben konfiguriert, dass Rechnungen die Zahlungsfrist nicht anzeigen. "
+"ZUGFeRD-Rechnungen werden die Zahlungsfrist im XML-Teil der Rechnung jedoch "
+"immer enthalten, daher empfehlen wir, sie auch im PDF-Teil anzuzeigen."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:224
+msgid "Seller contact"
+msgstr "Verkäuferkontakt"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:228
+msgid "X-Rechnung is active, but no seller contact is given."
+msgstr "XRechnung ist aktiv, aber kein Verkäuferkontakt ist angegeben."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:236
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:261
+msgid "X-Rechnung is not active."
+msgstr "XRechnung ist nicht aktiv."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:237
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:262
+msgid ""
+"ZUGFeRD invoices will be valid electronic invoices but might not be accepted "
+"by German governmental customers."
+msgstr ""
+"ZUGFeRD-Rechnungen werden trotzdem gültige E-Rechnungen darstellen, aber "
+"werden ggf. von Behördenkunden nicht akzeptiert."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:249
+msgid "Leitweg IDs"
+msgstr "Leitweg-IDs"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:253
+msgid "X-Rechnung is active, but customers cannot enter a Leitweg ID."
+msgstr "XRechnung ist aktiv, aber Kunden können keine Leitweg-ID eingeben."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:254
+msgid ""
+"If you expect German governmental customers, we recommend using the custom "
+"field to allow them to enter a Leitweg ID."
+msgstr ""
+"Wenn Sie deutsche Behörden als Kunden erwarten, empfehlen wir, das "
+"\"zusätzliche Empfängerfeld\" für die Leitweg-ID zu verwenden."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:274
+msgid "Tax rules"
+msgstr "Steuer-Regeln"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:278
+msgid "Not all products use a tax rule."
+msgstr "Nicht alle Produkte verwenden eine Steuer-Regel."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:279
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:288
+msgid "pretix will need to guess the correct tax handling for your invoice."
+msgstr "pretix muss die korrekte Steuerbezeichnung für Ihre Rechnung raten."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:280
+msgid "Please configure explicit tax rules to avoid incorrect invoices."
+msgstr ""
+"Bitte konfigurieren Sie explizite Steuer-Regeln um falsche Rechnungen zu "
+"vermeiden."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:287
+msgid "Not all tax rule have a tax code set."
+msgstr "Nicht alle Steuerregeln haben eine Steuerkodierung."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:289
+msgid ""
+"Please configure a tax code for every tax rule including all custom rules to "
+"avoid incorrect invoices."
+msgstr ""
+"Bitte konfigurieren Sie eine Steuerkodierung für alle Steuerregeln inkl. "
+"individueller Regeln, um falsche Rechnungen zu vermeiden."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:303
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:310
+msgid "Save"
+msgstr "Speichern"
+
+#: pretix_zugferd/views.py:14
+msgid "Seller contact name"
+msgstr "Verkäuferkontakt Name"
+
+#: pretix_zugferd/views.py:15 pretix_zugferd/views.py:20
+#: pretix_zugferd/views.py:25
+msgid "Required for a valid XRechnung"
+msgstr "Erforderlich für gültige XRechnungen"
+
+#: pretix_zugferd/views.py:19
+msgid "Seller contact email"
+msgstr "Verkäuferkontakt E-Mail"
+
+#: pretix_zugferd/views.py:24
+msgid "Seller contact phone number"
+msgstr "Verkäuferkontakt Telefonnummer"
+
+#: pretix_zugferd/views.py:30
+msgid "Include event date as delivery date"
+msgstr "Veranstaltungsdatum als Leistungsdatum ausweisen"
+
+#: pretix_zugferd/views.py:34
+msgid "Hide label that advertises the included XRechnung"
+msgstr "Label verstecken, das auf die enthaltene E-Rechnung hinweist"
+
+#~ msgid ""
+#~ "Note: Use this plugin at your own risk. If there is a semantic difference "
+#~ "between the XML and PDF contents in your ZUGFeRD invoices, you might "
+#~ "legally owe the VAT to the financial authorities twice, since you then "
+#~ "legally sent two invoices. We tried our best to avoid this, but we do not "
+#~ "assume any liability. Please check the output of this plugin with your "
+#~ "tax or legal attorney before use."
+#~ msgstr ""
+#~ "Vorsicht: Benutzen Sie diese Erweiterung auf eigene Gefahr. Im Falle "
+#~ "eines semantischen Unterschieds zwischen den PDF- und XML-Inhalten einer "
+#~ "ZUGFeRD-Rechnung kann die Umsatzsteuer dem Finanzamt streng genommen "
+#~ "doppelt geschuldet werden, da rechtlich zwei verschiedene Rechnungen "
+#~ "vorliegen. Wir bemühen uns sehr, solche Abweichungen zu vermeiden, aber "
+#~ "übernehmen keine Haftung. Bitte lassen Sie die Ausgabe der Rechnungen im "
+#~ "Zweifel durch Ihren Steuerberater prüfen."
