@@ -167,7 +167,7 @@
                     {% blocktrans trimmed %}
                         You have entered content in the individual invoice text fields.
                         The texts will be included in the electronic invoice as well, but be aware that a customer who
-                        processes the electronic invoices automatically might not take them account. Make sure they do
+                        processes the electronic invoices automatically might not take them into account. Make sure they do
                         not include vital details on payment or taxation matters.
                     {% endblocktrans %}
                     <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_introductory_text_0"
