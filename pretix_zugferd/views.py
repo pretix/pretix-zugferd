@@ -6,6 +6,8 @@ from pretix.base.forms import SettingsForm
 from pretix.base.models import Event
 from pretix.control.views.event import EventSettingsFormView, EventSettingsViewMixin
 
+from pretix_zugferd.invoice import ZugferdMixin
+
 
 class ZugferdSettingsForm(SettingsForm):
     zugferd_seller_contact_name = forms.CharField(
@@ -47,4 +49,28 @@ class SettingsView(EventSettingsViewMixin, EventSettingsFormView):
                 "organizer": self.request.event.organizer.slug,
                 "event": self.request.event.slug,
             },
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **kwargs,
+            is_zugferd_renderer=isinstance(
+                self.request.event.invoice_renderer, ZugferdMixin
+            ),
+            is_xrechnung_renderer=(
+                getattr(self.request.event.invoice_renderer, "profile", None)
+                == "XRECHNUNG"
+            ),
+            has_leitweg_id=(
+                self.request.event.settings.invoice_address_custom_field.localize("de")
+                and "leitweg"
+                in self.request.event.settings.invoice_address_custom_field.localize(
+                    "de"
+                ).lower()
+            ),
+            tax_rules_used=not self.request.event.tax_rules.exists()
+            or not self.request.event.items.filter(tax_rule__isnull=True).exists(),
+            tax_codes_used=not self.request.event.tax_rules.filter(
+                code__isnull=True
+            ).exists(),
         )

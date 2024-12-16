@@ -2,14 +2,305 @@
 {% load i18n %}
 {% load bootstrap3 %}
 {% block inside %}
-    <h1>{% trans "ZUGFeRD" %}</h1>
-    <div class="alert alert-info">
-        {% url "control:event.settings.invoice" event=request.event.slug organizer=request.organizer.slug as settings_url %}
-        {% blocktrans trimmed with settings_url=settings_url|add:"#tab-0-3-open" %}
-            If you want to use the XRechnung profile, you should make use of the "custom recipient field" in invoice settings
-            for the buyer reference ID. Also make sure to use a compatible invoice layout (+ ZUGFeRD) in your <a href="{{ settings_url }}">invoice settings</a>.
+    <h1>{% trans "ZUGFeRD invoices" %}</h1>
+
+    <h2>{% trans "Configuration check" %}</h2>
+    <p>
+        {% blocktrans trimmed %}
+            We've checked the configuration of your event for compatibility with ZUGFeRD invoices and found the result
+            shown in the following table. Note that this check can only cover usual cases and it is ultimately your
+            responsibility that the resulting ZUGFeRD invoices comply with all regulations they might need to.
+            ZUGFeRD invoices need to be machine-readable. This also means that all important information on the
+            invoice must only be in the pre-defined fields and information included in unstructured text should not
+            conflicht with the structured information.
         {% endblocktrans %}
-    </div>
+    </p>
+    <p>
+        {% blocktrans trimmed %}
+            We recommend inspecting a sample invoice with one of the many available validation tools and discussing
+            the results with your tax accountant to make sure you are fully in compliance with tax regulations.
+            Note that some invoice recipients, such as government customers, might impose stricter requirements than
+            what is required by tax law.
+        {% endblocktrans %}
+    </p>
+    <table class="table table-hover table-condensed">
+        <thead>
+        <tr>
+            <th>{% trans "Setting" %}</th>
+            <th>{% trans "Status" %}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{% trans "Invoice generation" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_generate %}
+                    <span class="fa fa-fw fa-warning text-danger" aria-hidden="true"></span>
+                    {% trans "Invoice generation is not enabled for your event." %}
+                    {% trans "ZUGFeRD invoices cannot be created." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_generate_1"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                    {% trans "Invoice generation is enabled." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Invoice style" %}</td>
+            <td>
+                {% if not is_zugferd_renderer %}
+                    <span class="fa fa-fw fa-warning text-danger" aria-hidden="true"></span>
+                    {% trans "You have not selected a ZUGFeRD-enabled invoice renderer." %}
+                    {% trans "ZUGFeRD invoices cannot be created." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_renderer"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                    {% trans "A ZUGFeRD-enabled invoice renderer is active." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Seller address" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_address_from_country %}
+                    <span class="fa fa-fw fa-warning text-danger" aria-hidden="true"></span>
+                    {% trans "No country is set for the invoice sender address." %}
+                    {% trans "ZUGFeRD invoices cannot be created." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_from_country"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success" aria-hidden="true"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Seller VAT ID" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_address_from_vat_id %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "Your VAT ID is not set." %}
+                    {% trans "ZUGFeRD invoices can be created, but will likely be rejected as invalid." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_from_vat_id"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Invoice addresses" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_address_asked %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "Invoice addresses are not asked." %}
+                    {% trans "ZUGFeRD invoices cannot be created." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_asked"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% elif not request.event.settings.invoice_address_required %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% trans "Invoice addresses are not required." %}
+                    {% trans "ZUGFeRD invoices can only be created if an invoice address is entered." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_required"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "VAT IDs" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_address_vatid %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "Customers cannot enter a VAT ID." %}
+                    {% trans "ZUGFeRD invoices can be created, but will likely be rejected as invalid." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_vatid"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Beneficiary" %}</td>
+            <td>
+                {% if request.event.settings.invoice_address_beneficiary %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "You have enabled the option to allow customers to name a different beneficiary." %}
+                    {% trans "This is not currently supported by this module and the beneficiary will not be included in the XML part of the ZUGFeRD invoice." %}
+                    {% trans "We recommend disabling this option." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_beneficiary"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is not set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Custom texts" %}</td>
+            <td>
+                {% if request.event.settings.invoice_introductory_text or request.event.settings.invoice_additional_text %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% blocktrans trimmed %}
+                        You have entered content in the individual invoice text fields.
+                        The texts will be included in the electronic invoice as well, but be aware that a customer who
+                        processes the electronic invoices automatically might not take them into account. Make sure they do
+                        not include vital details on payment or taxation matters.
+                    {% endblocktrans %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_introductory_text"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "No custom texts used." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Footer text" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_footer_text %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% blocktrans trimmed %}
+                        You have not entered a footer text. Make sure your invoice contains all relevant regulatory
+                        information (e.g. registration numbers, management board) on both the PDF and XML part of the
+                        ZUGFeRD invoice.
+                    {% endblocktrans %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_footer_text"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Payment deadline" %}</td>
+            <td>
+                {% if not request.event.settings.invoice_include_expire_date %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% blocktrans trimmed %}
+                        You have configured invoices not to show the payment deadline. ZUGFeRD invoices will,
+                        however, always include the payment deadline in the XML part, so we recommend showing it on the
+                        PDF part as well.
+                    {% endblocktrans %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_include_expire_date"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Seller contact" %}</td>
+            <td>
+                {% if not request.event.settings.zugferd_seller_contact_name or not request.event.settings.zugferd_seller_contact_email or not request.event.settings.zugferd_seller_contact_phone %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "X-Rechnung is active, but no seller contact is given." %}
+                    {% trans "ZUGFeRD invoices can be created, but will likely be rejected as invalid." %}
+                    <a href="#id_zugferd_seller_contact_name"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% elif not is_xrechnung_renderer %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% trans "X-Rechnung is not active." %}
+                    {% trans "ZUGFeRD invoices will be valid electronic invoices but might not be accepted by German governmental customers." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_renderer"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Leitweg IDs" %}</td>
+            <td>
+                {% if is_xrechnung_renderer and not has_leitweg_id %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "X-Rechnung is active, but customers cannot enter a Leitweg ID." %}
+                    {% trans "If you expect German governmental customers, we recommend using the custom field to allow them to enter a Leitweg ID." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_address_custom_field"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% elif not is_xrechnung_renderer %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% trans "X-Rechnung is not active." %}
+                    {% trans "ZUGFeRD invoices will be valid electronic invoices but might not be accepted by German governmental customers." %}
+                    <a href="{% url "control:event.settings.invoice" event=request.event.slug organizer=request.event.organizer.slug %}#id_invoice_renderer"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>{% trans "Tax rules" %}</td>
+            <td>
+                {% if not tax_rules_used %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "Not all products use a tax rule." %}
+                    {% trans "pretix will need to guess the correct tax handling for your invoice." %}
+                    {% trans "Please configure explicit tax rules to avoid incorrect invoices." %}
+                    <a href="{% url "control:event.items" event=request.event.slug organizer=request.event.organizer.slug %}"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% elif not tax_codes_used %}
+                    <span class="fa fa-fw fa-warning text-danger"></span>
+                    {% trans "Not all tax rule have a tax code set." %}
+                    {% trans "pretix will need to guess the correct tax handling for your invoice." %}
+                    {% trans "Please configure a tax code for every tax rule including all custom rules to avoid incorrect invoices." %}
+                    <a href="{% url "control:event.settings.tax" event=request.event.slug organizer=request.event.organizer.slug %}"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% endif %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>{% trans "Settings" %}</h2>
     <form action="" method="post" class="form-horizontal" enctype="multipart/form-data">
         {% csrf_token %}
         {% bootstrap_form_errors form %}

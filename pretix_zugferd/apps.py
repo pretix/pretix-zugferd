@@ -23,21 +23,6 @@ class PluginApp(AppConfig):
                 "This plugin provides an invoice renderer that annotates pretix invoices with ZUGFeRD data, "
                 "a structured data format for invoices used in Germany."
             )
-            t += '<div class="text text-warning">'
-            t += gettext(
-                "ZUGFeRD is a complicated format and the automatic conversion of invoices does not work in all possible "
-                "situations. The result quality will depend on the exact settings in use such as payment providers and needs "
-                "to be verified individually."
-            )
-            t += "</div>"
-            t += '<div class="text text-warning">'
-            t += gettext(
-                "Note: Use this plugin at your own risk. If there is a semantic difference between the XML and PDF "
-                "contents in your ZUGFeRD invoices, you might legally owe the VAT to the financial authorities twice, "
-                "since you then legally sent two invoices. We tried our best to avoid this, but we do not assume "
-                "any liability. Please check the output of this plugin with your tax or legal attorney before use."
-            )
-            t += "</div>"
             return mark_safe(t)
 
     def ready(self):
