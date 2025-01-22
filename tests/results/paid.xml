@@ -73,6 +73,7 @@ Attendee: Peter</ram:Description>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
         <ram:ApplicableHeaderTradeAgreement>
+            <ram:BuyerReference>PO-12345</ram:BuyerReference>
             <ram:SellerTradeParty>
                 <ram:Name>Musterfirma</ram:Name>
                 <ram:PostalTradeAddress>

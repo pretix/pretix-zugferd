@@ -491,6 +491,6 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
 
     def _zugferd_generate_document(self, invoice):
         doc = super()._zugferd_generate_document(invoice)
-        if self.order.event.settings.invoice_address_custom_field:
+        if self.event.settings.invoice_address_custom_field:
             doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
         return doc
