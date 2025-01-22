@@ -445,7 +445,7 @@ class ZugferdMixin:
 class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
     identifier = "classic_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(
+        lambda a: "{} + ZUGFeRD 2.3 Profil EXTENDED".format(
             ClassicInvoiceRenderer.verbose_name
         ),
         str,
@@ -455,7 +455,7 @@ class ZugferdInvoiceRenderer(ZugferdMixin, ClassicInvoiceRenderer):
 class Modern1ZugferdInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     identifier = "modern1_zugferd"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil EXTENDED".format(
+        lambda a: "{} + ZUGFeRD 2.3 Profil EXTENDED".format(
             Modern1Renderer.verbose_name
         ),
         str,
@@ -471,7 +471,7 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
     )
     business_process_id = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
     verbose_name = lazy(
-        lambda a: "{} + ZUGFeRD 2.2 Profil XRECHNUNG".format(
+        lambda a: "{} + ZUGFeRD 2.3 Profil XRECHNUNG".format(
             Modern1Renderer.verbose_name
         ),
         str,
