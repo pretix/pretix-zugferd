@@ -280,6 +280,7 @@ class ZugferdMixin:
             note.content.add(
                 remove_control_characters(invoice.footer_text.replace("<br />", " / "))
             )
+            note.subject_code = "REG"
             doc.header.notes.add(note)
 
         pt = PaymentTerms()
