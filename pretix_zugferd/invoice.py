@@ -267,6 +267,7 @@ class ZugferdMixin:
         doc.header.notes.add(note)
 
         if invoice.internal_reference:
+            doc.trade.agreement.buyer_reference = invoice.internal_reference
             note = IncludedNote()
             note.content.add(
                 pgettext("invoice", "Customer reference: {reference}").format(
@@ -490,5 +491,6 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
 
     def _zugferd_generate_document(self, invoice):
         doc = super()._zugferd_generate_document(invoice)
-        doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
+        if self.order.event.settings.invoice_address_custom_field:
+            doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
         return doc
