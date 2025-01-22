@@ -32,6 +32,7 @@
         </ram:IncludedNote>
         <ram:IncludedNote>
             <ram:Content>Footer-Text</ram:Content>
+            <ram:SubjectCode>REG</ram:SubjectCode>
         </ram:IncludedNote>
     </rsm:ExchangedDocument>
     <rsm:SupplyChainTradeTransaction>

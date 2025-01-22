@@ -4,7 +4,6 @@ import pytest
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from freezegun import freeze_time
-
 from pretix.base.services.invoices import (
     generate_cancellation,
     generate_invoice,
