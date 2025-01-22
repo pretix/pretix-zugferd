@@ -14,7 +14,7 @@ from django.utils.translation import gettext as _, pgettext
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
-from drafthorse.models.party import TaxRegistration, URIUniversalCommunication
+from drafthorse.models.party import TaxRegistration
 from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
@@ -159,17 +159,9 @@ class ZugferdMixin:
             doc.trade.agreement.seller.contact.email.address = (
                 invoice.event.settings.zugferd_seller_contact_email
             )
-            doc.trade.agreement.buyer.electronic_address.add(
-                URIUniversalCommunication(
-                    uri_ID=("EM", invoice.event.settings.zugferd_seller_contact_email)
-                )
-            )
+            doc.trade.agreement.buyer.electronic_address.uri_ID = ("EM", invoice.event.settings.zugferd_seller_contact_email)
         elif invoice.event.settings.contact_mail:
-            doc.trade.agreement.buyer.electronic_address.add(
-                URIUniversalCommunication(
-                    uri_ID=("EM", invoice.event.settings.contact_mail)
-                )
-            )
+            doc.trade.agreement.buyer.electronic_address.uri_ID = ("EM", invoice.event.settings.contact_mail)
         if invoice.event.settings.zugferd_seller_contact_phone:
             doc.trade.agreement.seller.contact.telephone.number = (
                 invoice.event.settings.zugferd_seller_contact_phone
@@ -206,13 +198,9 @@ class ZugferdMixin:
             and invoice.custom_field
             and self.re_leitweg_id.match(invoice.custom_field)
         ):
-            doc.trade.agreement.seller.electronic_address.add(
-                URIUniversalCommunication(uri_ID=("0204", invoice.custom_field))
-            )
+            doc.trade.agreement.seller.electronic_address.uri_ID = ("0204", invoice.custom_field)
         elif invoice.order.email:
-            doc.trade.agreement.seller.electronic_address.add(
-                URIUniversalCommunication(uri_ID=("EM", invoice.order.email))
-            )
+            doc.trade.agreement.seller.electronic_address.uri_ID = ("EM", invoice.order.email)
 
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
