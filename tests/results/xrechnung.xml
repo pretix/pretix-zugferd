@@ -120,7 +120,7 @@ Attendee: Peter</ram:Description>
             <ram:PaymentReference>DUMMY-FOO</ram:PaymentReference>
             <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
             <ram:SpecifiedTradeSettlementPaymentMeans>
-                <ram:TypeCode>30</ram:TypeCode>
+                <ram:TypeCode>58</ram:TypeCode>
                 <ram:PayeePartyCreditorFinancialAccount>
                     <ram:IBANID>DE1234567890</ram:IBANID>
                 </ram:PayeePartyCreditorFinancialAccount>
