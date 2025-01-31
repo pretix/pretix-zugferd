@@ -29,6 +29,10 @@ class ZugferdSettingsForm(SettingsForm):
     zugferd_include_delivery_date = forms.BooleanField(
         label=_("Include event date as delivery date"),
         required=False,
+        help_text=_(
+            "Invoices must contain a delivery date. If this option is unselected, the invoice date is set as "
+            "the delivery date."
+        ),
     )
     zugferd_hide_label = forms.BooleanField(
         label=_("Hide label that advertises the included XRechnung"),

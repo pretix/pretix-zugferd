@@ -108,7 +108,7 @@ Attendee: Peter</ram:Description>
         <ram:ApplicableHeaderTradeDelivery>
             <ram:ActualDeliverySupplyChainEvent>
                 <ram:OccurrenceDateTime>
-                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                    <udt:DateTimeString format="102">20241214</udt:DateTimeString>
                 </ram:OccurrenceDateTime>
             </ram:ActualDeliverySupplyChainEvent>
         </ram:ApplicableHeaderTradeDelivery>
