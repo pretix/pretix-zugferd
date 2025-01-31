@@ -298,7 +298,7 @@ class ZugferdMixin:
         )
         if lp and lp.provider == "banktransfer":
             if invoice.event.settings.payment_banktransfer_bank_details_type == "sepa":
-                doc.trade.settlement.payment_means.type_code = "30"
+                doc.trade.settlement.payment_means.type_code = "58"
                 doc.trade.settlement.payment_means.payee_account.iban = (
                     invoice.event.settings.payment_banktransfer_bank_details_sepa_iban
                 )
@@ -307,7 +307,7 @@ class ZugferdMixin:
                 )
 
             else:
-                doc.trade.settlement.payment_means.type_code = "58"
+                doc.trade.settlement.payment_means.type_code = "30"
         elif lp and lp.provider == "sepadebit":
             doc.trade.settlement.payment_means.type_code = "59"
             doc.trade.settlement.payment_means.payer_account.iban = lp.info_data.get(
