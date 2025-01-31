@@ -19,6 +19,7 @@ from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
+from pretix.base.models import Order
 from pretix.base.models.tax import EU_COUNTRIES
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
@@ -370,6 +371,19 @@ class ZugferdMixin:
         doc.trade.settlement.monetary_summation.tax_total = (taxtotal, cc)
         doc.trade.settlement.monetary_summation.grand_total = total
         doc.trade.settlement.monetary_summation.due_amount = total
+
+        if not self.invoice.is_cancellation:
+            payment_refund_sum = self.invoice.order.payment_refund_sum
+            if payment_refund_sum and (
+                self.invoice.event.settings.invoice_show_payments
+                or self.invoice.order.status == Order.STATUS_PAID
+            ):
+                doc.trade.settlement.monetary_summation.prepaid_total = (
+                    payment_refund_sum
+                )
+                doc.trade.settlement.monetary_summation.due_amount = (
+                    total - payment_refund_sum
+                )
         return doc
 
     def _on_first_page(self, canvas: Canvas, doc):

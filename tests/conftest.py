@@ -87,7 +87,7 @@ def order(event, organizer, item):
         sales_channel=event.organizer.sales_channels.get(identifier="web"),
         datetime=datetime(2024, 12, 1, 10, 0, 0, tzinfo=UTC),
         expires=datetime(2024, 12, 10, 10, 0, 0, tzinfo=UTC),
-        total=Decimal("100.00"),
+        total=Decimal("23.00"),
         locale="en",
     )
     OrderPosition.objects.create(

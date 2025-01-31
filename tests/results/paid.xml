@@ -139,7 +139,8 @@ Attendee: Peter</ram:Description>
                 <ram:TaxBasisTotalAmount>19.33</ram:TaxBasisTotalAmount>
                 <ram:TaxTotalAmount currencyID="EUR">3.67</ram:TaxTotalAmount>
                 <ram:GrandTotalAmount>23.00</ram:GrandTotalAmount>
-                <ram:DuePayableAmount>23.00</ram:DuePayableAmount>
+                <ram:TotalPrepaidAmount>23.00</ram:TotalPrepaidAmount>
+                <ram:DuePayableAmount>0.00</ram:DuePayableAmount>
             </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         </ram:ApplicableHeaderTradeSettlement>
     </rsm:SupplyChainTradeTransaction>
