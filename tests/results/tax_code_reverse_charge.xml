@@ -63,6 +63,7 @@ Attendee: Peter</ram:Description>
             <ram:SpecifiedLineTradeSettlement>
                 <ram:ApplicableTradeTax>
                     <ram:TypeCode>VAT</ram:TypeCode>
+                    <ram:ExemptionReason>VATEX-EU-AE</ram:ExemptionReason>
                     <ram:CategoryCode>AE</ram:CategoryCode>
                     <ram:RateApplicablePercent>0.00</ram:RateApplicablePercent>
                 </ram:ApplicableTradeTax>
@@ -120,6 +121,7 @@ Attendee: Peter</ram:Description>
             <ram:ApplicableTradeTax>
                 <ram:CalculatedAmount>0.00</ram:CalculatedAmount>
                 <ram:TypeCode>VAT</ram:TypeCode>
+                <ram:ExemptionReason>VATEX-EU-AE</ram:ExemptionReason>
                 <ram:BasisAmount>23.00</ram:BasisAmount>
                 <ram:CategoryCode>AE</ram:CategoryCode>
                 <ram:RateApplicablePercent>0.00</ram:RateApplicablePercent>

@@ -77,14 +77,20 @@ class ZugferdMixin:
                     category, reason = line.tax_code, None
                 if category == "E" and reason:
                     exemption_reason = reason
+                elif category == "AE":
+                    exemption_reason = "VATEX-EU-AE"
+                elif category == "O":
+                    exemption_reason = "VATEX-EU-O"
             elif line.tax_rate == Decimal("0.00"):
                 if invoice.reverse_charge:
                     category = "AE"  # Reverse charge
+                    exemption_reason = "VATEX-EU-AE"
                 elif (
                     str(invoice.invoice_from_country) in EU_COUNTRIES
                     and str(invoice.invoice_to_country) not in EU_COUNTRIES
                 ):
                     category = "O"  # Services outside scope of tax
+                    exemption_reason = "VATEX-EU-O"
                 else:
                     # We don't know with pretix' information whether this is Z ("zero-rated goods"), E ("exempt from tax")
                     # or something else. Let's assume E and refer to the notes.
