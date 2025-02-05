@@ -164,7 +164,7 @@ def test_guess_tax_code(event, order, tax_rule):
 @scopes_disabled()
 @freeze_time("2024-12-14 12:00:00+01:00")
 def test_delivery_date(event, order, tax_rule):
-    event.settings.zugferd_include_delivery_date = True
+    event.settings.zugferd_include_delivery_date = False
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
     invoice_pdf_task(i.pk)
@@ -172,7 +172,7 @@ def test_delivery_date(event, order, tax_rule):
     reader = PdfReader(i.file)
     xml = reader.attachments["factur-x.xml"][0]
 
-    compare(xml, r("delivery_dates.xml"), schema="FACTUR-X_EXTENDED")
+    compare(xml, r("delivery_date_off.xml"), schema="FACTUR-X_EXTENDED")
 
 
 @pytest.mark.django_db

@@ -235,6 +235,10 @@ class ZugferdMixin:
             ]
             if ds:
                 doc.trade.delivery.event.occurrence = max(ds)
+            else:
+                doc.trade.delivery.event.occurrence = invoice.date
+        else:
+            doc.trade.delivery.event.occurrence = invoice.date
 
         note = IncludedNote()
         note.content.add(_("Order code: {code}").format(code=invoice.order.full_code))
