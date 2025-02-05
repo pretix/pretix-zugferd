@@ -9,7 +9,7 @@ def keep_old_default(apps, schema_editor):
 
     for e in Event.objects.filter(plugins__contains="pretix_zugferd"):
         EventSettingsStore.objects.get_or_create(
-            object=e, key="zugferd_include_delivery_date", value="False"
+            object=e, key="zugferd_include_delivery_date", defaults={"value": "False"}
         )
         cache.delete("hierarkey_{}_{}".format("event", e.pk))
 
