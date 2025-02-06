@@ -378,11 +378,11 @@ class ZugferdMixin:
                 self.invoice.event.settings.invoice_show_payments
                 or self.invoice.order.status == Order.STATUS_PAID
             ):
-                doc.trade.settlement.monetary_summation.prepaid_total = (
-                    payment_refund_sum
+                doc.trade.settlement.monetary_summation.prepaid_total = min(
+                    payment_refund_sum, total
                 )
-                doc.trade.settlement.monetary_summation.due_amount = (
-                    total - payment_refund_sum
+                doc.trade.settlement.monetary_summation.due_amount = min(
+                    total - payment_refund_sum, Decimal("0.00")
                 )
         return doc
 
