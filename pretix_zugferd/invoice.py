@@ -108,8 +108,6 @@ class ZugferdMixin:
             li.product.name = desc.split("\n")[0]
             li.product.description = desc
             # For negative amounts, only the billed quantity may be negative, not the base price per quantity
-            li.agreement.gross.amount = abs(line.net_value).quantize(Decimal("0.0001"))
-            li.agreement.gross.basis_quantity = (Decimal("1.0000"), "C62")
             li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
             li.agreement.net.basis_quantity = (Decimal("1.0000"), "C62")
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
