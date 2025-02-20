@@ -89,7 +89,7 @@ Attendee: Peter</ram:Description>
                     <ram:CountryID>DE</ram:CountryID>
                 </ram:PostalTradeAddress>
                 <ram:URIUniversalCommunication>
-                    <ram:URIID schemeID="0204">9123-1234561-23</ram:URIID>
+                    <ram:URIID schemeID="EM">buha@example.org</ram:URIID>
                 </ram:URIUniversalCommunication>
                 <ram:SpecifiedTaxRegistration>
                     <ram:ID schemeID="FC">123/456/789</ram:ID>
@@ -108,7 +108,7 @@ Attendee: Peter</ram:Description>
                     <ram:CountryID>DE</ram:CountryID>
                 </ram:PostalTradeAddress>
                 <ram:URIUniversalCommunication>
-                    <ram:URIID schemeID="EM">buha@example.org</ram:URIID>
+                    <ram:URIID schemeID="0204">9123-1234561-23</ram:URIID>
                 </ram:URIUniversalCommunication>
                 <ram:SpecifiedTaxRegistration>
                     <ram:ID schemeID="VA">DE987654321</ram:ID>
