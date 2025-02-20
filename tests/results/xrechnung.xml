@@ -46,10 +46,6 @@
 Attendee: Peter</ram:Description>
             </ram:SpecifiedTradeProduct>
             <ram:SpecifiedLineTradeAgreement>
-                <ram:GrossPriceProductTradePrice>
-                    <ram:ChargeAmount>19.3300</ram:ChargeAmount>
-                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
-                </ram:GrossPriceProductTradePrice>
                 <ram:NetPriceProductTradePrice>
                     <ram:ChargeAmount>19.3300</ram:ChargeAmount>
                     <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
