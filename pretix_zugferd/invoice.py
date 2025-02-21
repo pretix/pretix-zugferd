@@ -164,12 +164,12 @@ class ZugferdMixin:
             doc.trade.agreement.seller.contact.email.address = (
                 invoice.event.settings.zugferd_seller_contact_email
             )
-            doc.trade.agreement.buyer.electronic_address.uri_ID = (
+            doc.trade.agreement.seller.electronic_address.uri_ID = (
                 "EM",
                 invoice.event.settings.zugferd_seller_contact_email,
             )
         elif invoice.event.settings.contact_mail:
-            doc.trade.agreement.buyer.electronic_address.uri_ID = (
+            doc.trade.agreement.seller.electronic_address.uri_ID = (
                 "EM",
                 invoice.event.settings.contact_mail,
             )
@@ -209,12 +209,12 @@ class ZugferdMixin:
             and invoice.custom_field
             and self.re_leitweg_id.match(invoice.custom_field)
         ):
-            doc.trade.agreement.seller.electronic_address.uri_ID = (
+            doc.trade.agreement.buyer.electronic_address.uri_ID = (
                 "0204",
                 invoice.custom_field,
             )
         elif invoice.order.email:
-            doc.trade.agreement.seller.electronic_address.uri_ID = (
+            doc.trade.agreement.buyer.electronic_address.uri_ID = (
                 "EM",
                 invoice.order.email,
             )

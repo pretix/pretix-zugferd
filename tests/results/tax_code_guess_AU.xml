@@ -78,9 +78,6 @@ Attendee: Peter</ram:Description>
                     <ram:CityName>Berlin</ram:CityName>
                     <ram:CountryID>DE</ram:CountryID>
                 </ram:PostalTradeAddress>
-                <ram:URIUniversalCommunication>
-                    <ram:URIID schemeID="EM">dummy@dummy.test</ram:URIID>
-                </ram:URIUniversalCommunication>
                 <ram:SpecifiedTaxRegistration>
                     <ram:ID schemeID="FC">123/456/789</ram:ID>
                 </ram:SpecifiedTaxRegistration>
@@ -97,6 +94,9 @@ Attendee: Peter</ram:Description>
                     <ram:CityName>Bielefeld</ram:CityName>
                     <ram:CountryID>AU</ram:CountryID>
                 </ram:PostalTradeAddress>
+                <ram:URIUniversalCommunication>
+                    <ram:URIID schemeID="EM">dummy@dummy.test</ram:URIID>
+                </ram:URIUniversalCommunication>
                 <ram:SpecifiedTaxRegistration>
                     <ram:ID schemeID="VA">DE987654321</ram:ID>
                 </ram:SpecifiedTaxRegistration>
