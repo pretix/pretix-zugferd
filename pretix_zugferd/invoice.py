@@ -274,6 +274,8 @@ class ZugferdMixin:
                 )
             )
             doc.header.notes.add(note)
+        else:
+            doc.trade.agreement.buyer_reference = "unknown"
 
         if invoice.introductory_text:
             note = IncludedNote()
@@ -505,4 +507,6 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
         doc = super()._zugferd_generate_document(invoice)
         if self.event.settings.invoice_address_custom_field:
             doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
+        elif not doc.trade.agreement.buyer_reference:
+            doc.trade.agreement.buyer_reference = "unknown"
         return doc
