@@ -14,7 +14,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "drafthorse==2025.1.*",
+    "drafthorse==2025.1.1",
 ]
 
 [project.entry-points."pretix.plugin"]

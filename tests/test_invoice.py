@@ -29,6 +29,7 @@ def test_render_default_zugferd(event, order):
     i.refresh_from_db()
     reader = PdfReader(i.file)
     xml = reader.attachments["factur-x.xml"][0]
+    assert xml.startswith(b"<?xml")
 
     compare(xml, r("default.xml"), schema="FACTUR-X_EXTENDED")
 
