@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <rsm:CrossIndustryInvoice xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
                           xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
                           xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
@@ -21,7 +22,7 @@
             <ram:Content>Order code: DUMMY-FOO</ram:Content>
         </ram:IncludedNote>
         <ram:IncludedNote>
-            <ram:Content>Dummy - Dec. 27, 2017, 10 a.m.</ram:Content>
+            <ram:Content>Dummy</ram:Content>
         </ram:IncludedNote>
         <ram:IncludedNote>
             <ram:Content>Customer reference: PO-12345</ram:Content>
@@ -30,7 +31,7 @@
             <ram:Content>Intro-Text</ram:Content>
         </ram:IncludedNote>
         <ram:IncludedNote>
-            <ram:Content>Additional Text / Reverse Charge: According to Article 194, 196 of Council Directive 2006/112/EEC, VAT liability rests with the service recipient.</ram:Content>
+            <ram:Content>Additional Text</ram:Content>
         </ram:IncludedNote>
         <ram:IncludedNote>
             <ram:Content>Footer-Text</ram:Content>
@@ -45,11 +46,12 @@
             <ram:SpecifiedTradeProduct>
                 <ram:Name>Ticket</ram:Name>
                 <ram:Description>Ticket
-Attendee: Peter</ram:Description>
+Attendee: Peter
+Date: Hamburg - Mon, July 31st, 2023 09:00</ram:Description>
             </ram:SpecifiedTradeProduct>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
-                    <ram:ChargeAmount>23.0000</ram:ChargeAmount>
+                    <ram:ChargeAmount>10.9200</ram:ChargeAmount>
                     <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
                 </ram:NetPriceProductTradePrice>
             </ram:SpecifiedLineTradeAgreement>
@@ -59,12 +61,57 @@ Attendee: Peter</ram:Description>
             <ram:SpecifiedLineTradeSettlement>
                 <ram:ApplicableTradeTax>
                     <ram:TypeCode>VAT</ram:TypeCode>
-                    <ram:ExemptionReason>VATEX-EU-AE</ram:ExemptionReason>
-                    <ram:CategoryCode>AE</ram:CategoryCode>
-                    <ram:RateApplicablePercent>0.00</ram:RateApplicablePercent>
+                    <ram:CategoryCode>S</ram:CategoryCode>
+                    <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
                 </ram:ApplicableTradeTax>
+                <ram:BillingSpecifiedPeriod>
+                    <ram:StartDateTime>
+                        <udt:DateTimeString format="102">20230731</udt:DateTimeString>
+                    </ram:StartDateTime>
+                    <ram:EndDateTime>
+                        <udt:DateTimeString format="102">20230731</udt:DateTimeString>
+                    </ram:EndDateTime>
+                </ram:BillingSpecifiedPeriod>
                 <ram:SpecifiedTradeSettlementLineMonetarySummation>
-                    <ram:LineTotalAmount>23.00</ram:LineTotalAmount>
+                    <ram:LineTotalAmount>10.92</ram:LineTotalAmount>
+                </ram:SpecifiedTradeSettlementLineMonetarySummation>
+            </ram:SpecifiedLineTradeSettlement>
+        </ram:IncludedSupplyChainTradeLineItem>
+        <ram:IncludedSupplyChainTradeLineItem>
+            <ram:AssociatedDocumentLineDocument>
+                <ram:LineID>2</ram:LineID>
+            </ram:AssociatedDocumentLineDocument>
+            <ram:SpecifiedTradeProduct>
+                <ram:Name>Ticket</ram:Name>
+                <ram:Description>Ticket
+Attendee: Peter
+Date: Berlin - Fri, Aug. 2nd, 2024 09:00</ram:Description>
+            </ram:SpecifiedTradeProduct>
+            <ram:SpecifiedLineTradeAgreement>
+                <ram:NetPriceProductTradePrice>
+                    <ram:ChargeAmount>8.4000</ram:ChargeAmount>
+                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                </ram:NetPriceProductTradePrice>
+            </ram:SpecifiedLineTradeAgreement>
+            <ram:SpecifiedLineTradeDelivery>
+                <ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity>
+            </ram:SpecifiedLineTradeDelivery>
+            <ram:SpecifiedLineTradeSettlement>
+                <ram:ApplicableTradeTax>
+                    <ram:TypeCode>VAT</ram:TypeCode>
+                    <ram:CategoryCode>S</ram:CategoryCode>
+                    <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+                </ram:ApplicableTradeTax>
+                <ram:BillingSpecifiedPeriod>
+                    <ram:StartDateTime>
+                        <udt:DateTimeString format="102">20240802</udt:DateTimeString>
+                    </ram:StartDateTime>
+                    <ram:EndDateTime>
+                        <udt:DateTimeString format="102">20240802</udt:DateTimeString>
+                    </ram:EndDateTime>
+                </ram:BillingSpecifiedPeriod>
+                <ram:SpecifiedTradeSettlementLineMonetarySummation>
+                    <ram:LineTotalAmount>8.40</ram:LineTotalAmount>
                 </ram:SpecifiedTradeSettlementLineMonetarySummation>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
@@ -105,7 +152,7 @@ Attendee: Peter</ram:Description>
         <ram:ApplicableHeaderTradeDelivery>
             <ram:ActualDeliverySupplyChainEvent>
                 <ram:OccurrenceDateTime>
-                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                    <udt:DateTimeString format="102">20240802</udt:DateTimeString>
                 </ram:OccurrenceDateTime>
             </ram:ActualDeliverySupplyChainEvent>
         </ram:ApplicableHeaderTradeDelivery>
@@ -122,19 +169,18 @@ Attendee: Peter</ram:Description>
                 </ram:PayeeSpecifiedCreditorFinancialInstitution>
             </ram:SpecifiedTradeSettlementPaymentMeans>
             <ram:ApplicableTradeTax>
-                <ram:CalculatedAmount>0.00</ram:CalculatedAmount>
+                <ram:CalculatedAmount>3.68</ram:CalculatedAmount>
                 <ram:TypeCode>VAT</ram:TypeCode>
-                <ram:ExemptionReason>VATEX-EU-AE</ram:ExemptionReason>
-                <ram:BasisAmount>23.00</ram:BasisAmount>
-                <ram:CategoryCode>AE</ram:CategoryCode>
-                <ram:RateApplicablePercent>0.00</ram:RateApplicablePercent>
+                <ram:BasisAmount>19.32</ram:BasisAmount>
+                <ram:CategoryCode>S</ram:CategoryCode>
+                <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
             </ram:ApplicableTradeTax>
             <ram:BillingSpecifiedPeriod>
                 <ram:StartDateTime>
-                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                    <udt:DateTimeString format="102">20230731</udt:DateTimeString>
                 </ram:StartDateTime>
                 <ram:EndDateTime>
-                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                    <udt:DateTimeString format="102">20240802</udt:DateTimeString>
                 </ram:EndDateTime>
             </ram:BillingSpecifiedPeriod>
             <ram:SpecifiedTradePaymentTerms>
@@ -143,11 +189,11 @@ Attendee: Peter</ram:Description>
                 </ram:DueDateDateTime>
             </ram:SpecifiedTradePaymentTerms>
             <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-                <ram:LineTotalAmount>23.00</ram:LineTotalAmount>
+                <ram:LineTotalAmount>19.32</ram:LineTotalAmount>
                 <ram:ChargeTotalAmount>0.00</ram:ChargeTotalAmount>
                 <ram:AllowanceTotalAmount>0.00</ram:AllowanceTotalAmount>
-                <ram:TaxBasisTotalAmount>23.00</ram:TaxBasisTotalAmount>
-                <ram:TaxTotalAmount currencyID="EUR">0.00</ram:TaxTotalAmount>
+                <ram:TaxBasisTotalAmount>19.32</ram:TaxBasisTotalAmount>
+                <ram:TaxTotalAmount currencyID="EUR">3.68</ram:TaxTotalAmount>
                 <ram:GrandTotalAmount>23.00</ram:GrandTotalAmount>
                 <ram:DuePayableAmount>23.00</ram:DuePayableAmount>
             </ram:SpecifiedTradeSettlementHeaderMonetarySummation>

@@ -129,6 +129,14 @@ Attendee: Peter</ram:Description>
                 <ram:CategoryCode>S</ram:CategoryCode>
                 <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
             </ram:ApplicableTradeTax>
+            <ram:BillingSpecifiedPeriod>
+                <ram:StartDateTime>
+                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                </ram:StartDateTime>
+                <ram:EndDateTime>
+                    <udt:DateTimeString format="102">20171227</udt:DateTimeString>
+                </ram:EndDateTime>
+            </ram:BillingSpecifiedPeriod>
             <ram:SpecifiedTradePaymentTerms>
                 <ram:Description>The payment for this invoice has already been received.</ram:Description>
                 <ram:DueDateDateTime>
