@@ -63,16 +63,16 @@ class ZugferdMixin:
         doc.header.type_code = "384" if invoice.is_cancellation else "380"
         doc.header.issue_date_time = invoice.date
 
-        lines_date_from = [
+        lines_date_from = set(
             line.event_date_from
             for line in invoice.lines.all()
             if line.event_date_from
-        ]
-        lines_date_to = [
+        )
+        lines_date_to = set(
             line.event_date_to or line.event_date_from
             for line in invoice.lines.all()
             if line.event_date_to or line.event_date_from
-        ]
+        )
 
         # ITEMS
         taxvalue_map = defaultdict(Decimal)
