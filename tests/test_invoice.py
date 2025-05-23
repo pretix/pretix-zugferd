@@ -1,9 +1,8 @@
 import json
 import os
+import pytest
 import zoneinfo
 from datetime import datetime
-
-import pytest
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from freezegun import freeze_time
