@@ -1,6 +1,8 @@
 import json
 import os
 import pytest
+import zoneinfo
+from datetime import datetime
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from freezegun import freeze_time
@@ -32,6 +34,46 @@ def test_render_default_zugferd(event, order):
     assert xml.startswith(b"<?xml")
 
     compare(xml, r("default.xml"), schema="FACTUR-X_EXTENDED")
+
+
+@pytest.mark.django_db
+@scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
+def test_different_delivery_dates(event, order):
+    se1 = event.subevents.create(
+        name="Hamburg",
+        active=True,
+        date_from=datetime(2023, 7, 31, 9, 0, 0, tzinfo=zoneinfo.ZoneInfo("UTC")),
+    )
+    p1 = order.positions.first()
+    p1.subevent = se1
+    p1.price = Decimal("13.00")
+    p1._calculate_tax()
+    p1.save()
+    se2 = event.subevents.create(
+        name="Berlin",
+        active=True,
+        date_from=datetime(2024, 8, 2, 9, 0, 0, tzinfo=zoneinfo.ZoneInfo("UTC")),
+    )
+    order.positions.create(
+        item=p1.item,
+        variation=None,
+        price=Decimal("10"),
+        subevent=se2,
+        attendee_name_parts={"_legacy": "Peter"},
+        secret="secret2",
+        pseudonymization_id="IJKLMNOPQRS",
+    )
+
+    event.settings.invoice_renderer = "modern1_zugferd"
+    event.has_subevents = True
+    event.save()
+    i = generate_invoice(order)
+    invoice_pdf_task(i.pk)
+    i.refresh_from_db()
+    reader = PdfReader(i.file)
+    xml = reader.attachments["factur-x.xml"][0]
+    compare(xml, r("delivery_date_multiple.xml"), schema="FACTUR-X_EXTENDED")
 
 
 @pytest.mark.django_db
@@ -164,7 +206,7 @@ def test_guess_tax_code(event, order, tax_rule):
 @pytest.mark.django_db
 @scopes_disabled()
 @freeze_time("2024-12-14 12:00:00+01:00")
-def test_delivery_date(event, order, tax_rule):
+def test_delivery_date_off(event, order, tax_rule):
     event.settings.zugferd_include_delivery_date = False
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
