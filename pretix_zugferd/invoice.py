@@ -419,7 +419,7 @@ class ZugferdMixin:
                 doc.trade.settlement.monetary_summation.prepaid_total = min(
                     payment_refund_sum, total
                 )
-                doc.trade.settlement.monetary_summation.due_amount = min(
+                doc.trade.settlement.monetary_summation.due_amount = max(
                     total - payment_refund_sum, Decimal("0.00")
                 )
         return doc
