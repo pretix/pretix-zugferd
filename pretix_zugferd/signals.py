@@ -52,6 +52,3 @@ def navbar_info(sender, request, **kwargs):
 
 
 settings_hierarkey.add_default("zugferd_hide_label", "True", default_type=bool)
-settings_hierarkey.add_default(
-    "zugferd_include_delivery_date", "True", default_type=bool
-)
