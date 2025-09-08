@@ -207,7 +207,7 @@ def test_guess_tax_code(event, order, tax_rule):
 @scopes_disabled()
 @freeze_time("2024-12-14 12:00:00+01:00")
 def test_delivery_date_off(event, order, tax_rule):
-    event.settings.invoice_period = "invoice_date"
+    event.settings.zugferd_include_delivery_date = False
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
     invoice_pdf_task(i.pk)
