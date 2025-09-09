@@ -179,27 +179,23 @@ class ZugferdMixin:
                 )
             )
 
-        if invoice.event.settings.zugferd_seller_contact_name:
-            doc.trade.agreement.seller.contact.person_name = (
-                invoice.event.settings.zugferd_seller_contact_name
-            )
-        if invoice.event.settings.zugferd_seller_contact_email:
-            doc.trade.agreement.seller.contact.email.address = (
-                invoice.event.settings.zugferd_seller_contact_email
-            )
+        zdata = invoice.plugin_data.get("zugferd", {})
+        if zdata.get("seller_contact_name"):
+            doc.trade.agreement.seller.contact.person_name = zdata[
+                "seller_contact_name"
+            ]
+        if zdata.get("seller_contact_email"):
+            doc.trade.agreement.seller.contact.email.address = zdata[
+                "seller_contact_email"
+            ]
             doc.trade.agreement.seller.electronic_address.uri_ID = (
                 "EM",
-                invoice.event.settings.zugferd_seller_contact_email,
+                zdata["seller_contact_email"],
             )
-        elif invoice.event.settings.contact_mail:
-            doc.trade.agreement.seller.electronic_address.uri_ID = (
-                "EM",
-                invoice.event.settings.contact_mail,
-            )
-        if invoice.event.settings.zugferd_seller_contact_phone:
-            doc.trade.agreement.seller.contact.telephone.number = (
-                invoice.event.settings.zugferd_seller_contact_phone
-            )
+        if zdata.get("seller_contact_phone"):
+            doc.trade.agreement.seller.contact.telephone.number = zdata[
+                "seller_contact_phone"
+            ]
 
         doc.trade.agreement.buyer.name = remove_control_characters(
             invoice.invoice_to_company or invoice.invoice_to_name
