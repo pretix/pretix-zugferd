@@ -1,7 +1,7 @@
 from django.dispatch import receiver
 from django.urls import resolve, reverse
 from pretix.base.settings import settings_hierarkey
-from pretix.base.signals import register_invoice_renderers
+from pretix.base.signals import build_invoice_data, register_invoice_renderers
 from pretix.control.signals import nav_event_settings
 
 
@@ -49,6 +49,19 @@ def navbar_info(sender, request, **kwargs):
             "active": url.namespace == "plugins:pretix_zugferd",
         }
     ]
+
+
+@receiver(build_invoice_data, dispatch_uid="zugferd_build_invoice_data")
+def recv_build_invoice_data(sender, invoice, **kwargs):
+    invoice.plugin_data["zugferd"] = {
+        "seller_contact_name": sender.settings.zugferd_seller_contact_name,
+        "seller_contact_email": (
+            sender.settings.zugferd_seller_contact_email
+            or invoice.event.settings.contact_mail
+        ),
+        "seller_contact_phone": sender.settings.zugferd_seller_contact_phone,
+    }
+    invoice.save(update_fields=["plugin_data"])
 
 
 settings_hierarkey.add_default("zugferd_hide_label", "True", default_type=bool)
