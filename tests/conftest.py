@@ -16,7 +16,11 @@ from pytz import UTC
 
 @pytest.fixture
 def organizer():
-    return Organizer.objects.create(name="Dummy", slug="dummy")
+    return Organizer.objects.create(
+        name="Dummy",
+        slug="dummy",
+        plugins="pretix.plugins.banktransfer",
+    )
 
 
 @pytest.fixture
