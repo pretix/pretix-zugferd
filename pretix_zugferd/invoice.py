@@ -15,7 +15,7 @@ from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
 from drafthorse.models.note import IncludedNote
 from drafthorse.models.party import TaxRegistration
-from drafthorse.models.payment import PaymentTerms
+from drafthorse.models.payment import PaymentTerms, PaymentMeans
 from drafthorse.models.tradelines import LineItem
 from drafthorse.pdf import attach_xml
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
@@ -267,7 +267,7 @@ class ZugferdMixin:
             doc.trade.delivery.event.occurrence = invoice.date
 
         note = IncludedNote()
-        note.content.add(_("Order code: {code}").format(code=invoice.order.full_code))
+        note.content = _("Order code: {code}").format(code=invoice.order.full_code)
         doc.header.notes.add(note)
 
         if not invoice.event.has_subevents:
@@ -289,16 +289,14 @@ class ZugferdMixin:
         else:
             p_str = remove_control_characters(str(invoice.event.name))
         note = IncludedNote()
-        note.content.add(p_str)
+        note.content = p_str
         doc.header.notes.add(note)
 
         if invoice.internal_reference:
             doc.trade.agreement.buyer_reference = invoice.internal_reference
             note = IncludedNote()
-            note.content.add(
-                pgettext("invoice", "Customer reference: {reference}").format(
-                    reference=remove_control_characters(invoice.internal_reference)
-                )
+            note.content = pgettext("invoice", "Customer reference: {reference}").format(
+                reference=remove_control_characters(invoice.internal_reference)
             )
             doc.header.notes.add(note)
         else:
@@ -306,31 +304,25 @@ class ZugferdMixin:
 
         if invoice.introductory_text:
             note = IncludedNote()
-            note.content.add(
-                remove_control_characters(
-                    invoice.introductory_text.replace("<br />", " / ")
-                )
+            note.content = remove_control_characters(
+                invoice.introductory_text.replace("<br />", " / ")
             )
             doc.header.notes.add(note)
 
         if invoice.additional_text:
             note = IncludedNote()
-            note.content.add(
-                remove_control_characters(
-                    " / ".join(
-                        line
-                        for line in invoice.additional_text.split("<br />")
-                        if line.split()
-                    )
+            note.content = remove_control_characters(
+                " / ".join(
+                    line
+                    for line in invoice.additional_text.split("<br />")
+                    if line.split()
                 )
             )
             doc.header.notes.add(note)
 
         if invoice.footer_text:
             note = IncludedNote()
-            note.content.add(
-                remove_control_characters(invoice.footer_text.replace("<br />", " / "))
-            )
+            note.content = remove_control_characters(invoice.footer_text.replace("<br />", " / "))
             note.subject_code = "REG"
             doc.header.notes.add(note)
 
@@ -339,6 +331,7 @@ class ZugferdMixin:
             invoice.payment_provider_text.replace("<br />", " / ")
         )
         pt.due = invoice.order.expires
+        pm = PaymentMeans()
 
         lp = (
             invoice.order.payments.exclude(
@@ -349,19 +342,19 @@ class ZugferdMixin:
         )
         if lp and lp.provider == "banktransfer":
             if invoice.event.settings.payment_banktransfer_bank_details_type == "sepa":
-                doc.trade.settlement.payment_means.type_code = "58"
-                doc.trade.settlement.payment_means.payee_account.iban = (
+                pm.type_code = "58"
+                pm.payee_account.iban = (
                     invoice.event.settings.payment_banktransfer_bank_details_sepa_iban
                 )
-                doc.trade.settlement.payment_means.payee_institution.bic = (
+                pm.payee_institution.bic = (
                     invoice.event.settings.payment_banktransfer_bank_details_sepa_bic
                 )
 
             else:
-                doc.trade.settlement.payment_means.type_code = "30"
+                pm.type_code = "30"
         elif lp and lp.provider == "sepadebit":
-            doc.trade.settlement.payment_means.type_code = "59"
-            doc.trade.settlement.payment_means.payer_account.iban = lp.info_data.get(
+            pm.type_code = "59"
+            pm.payer_account.iban = lp.info_data.get(
                 "iban"
             )
             doc.trade.settlement.creditor_reference_id = (
@@ -369,17 +362,18 @@ class ZugferdMixin:
             )
             pt.debit_mandate_id = lp.info_data.get("reference")
         else:
-            doc.trade.settlement.payment_means.type_code = "ZZZ"
+            pm.type_code = "ZZZ"
 
         doc.trade.settlement.payment_reference = invoice.order.full_code
         doc.trade.settlement.currency_code = cc
         if invoice.payment_provider_text:
-            doc.trade.settlement.payment_means.information.add(
+            pm.information.add(
                 remove_control_characters(
                     invoice.payment_provider_text.replace("<br />", " / ")
                 )
             )
         doc.trade.settlement.terms.add(pt)
+        doc.trade.settlement.payment_means.add(pm)
 
         if invoice.is_cancellation:
             doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = (
