@@ -207,16 +207,12 @@ class ZugferdMixin:
         doc.trade.agreement.buyer.address.postcode = remove_control_characters(
             invoice.invoice_to_zipcode
         )
-        if invoice.invoice_to_company and invoice.invoice_to_name:
-            doc.trade.agreement.buyer.address.line_one = remove_control_characters(
+        doc.trade.agreement.buyer.address.line_one = remove_control_characters(
+            invoice.invoice_to_street
+        )
+        if invoice.invoice_to_name:
+            doc.trade.agreement.buyer.contact.person_name = remove_control_characters(
                 invoice.invoice_to_name
-            )
-            doc.trade.agreement.buyer.address.line_two = remove_control_characters(
-                invoice.invoice_to_street
-            )
-        else:
-            doc.trade.agreement.buyer.address.line_one = remove_control_characters(
-                invoice.invoice_to_street
             )
         doc.trade.agreement.buyer.address.city_name = remove_control_characters(
             invoice.invoice_to_city
@@ -241,6 +237,8 @@ class ZugferdMixin:
                 "EM",
                 invoice.order.email,
             )
+        if invoice.order.email:
+            doc.trade.agreement.buyer.contact.email.address = invoice.order.email
 
         if invoice.invoice_to_vat_id:
             doc.trade.agreement.buyer.tax_registrations.add(
