@@ -385,7 +385,7 @@ class ZugferdMixin:
             doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = (
                 invoice.refers.number
             )
-            # todo: doc.trade.settlement.invoice_referenced_document.date_time_string = invoice.refers.date
+            doc.trade.settlement.invoice_referenced_document.issue_date_time = invoice.refers.date
 
         taxtotal = Decimal(0)
         for idx, gross in grossvalue_map.items():
