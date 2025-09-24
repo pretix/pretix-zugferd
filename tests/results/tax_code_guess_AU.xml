@@ -87,10 +87,15 @@ Attendee: Peter</ram:Description>
             </ram:SellerTradeParty>
             <ram:BuyerTradeParty>
                 <ram:Name>Kundenfirma</ram:Name>
+                <ram:DefinedTradeContact>
+                    <ram:PersonName>Peter</ram:PersonName>
+                    <ram:EmailURIUniversalCommunication>
+                        <ram:URIID>dummy@dummy.test</ram:URIID>
+                    </ram:EmailURIUniversalCommunication>
+                </ram:DefinedTradeContact>
                 <ram:PostalTradeAddress>
                     <ram:PostcodeCode>54321</ram:PostcodeCode>
-                    <ram:LineOne>Peter</ram:LineOne>
-                    <ram:LineTwo>Sesamstra&#223;e 123</ram:LineTwo>
+                    <ram:LineOne>Sesamstra&#223;e 123</ram:LineOne>
                     <ram:CityName>Bielefeld</ram:CityName>
                     <ram:CountryID>AU</ram:CountryID>
                 </ram:PostalTradeAddress>
