@@ -65,6 +65,3 @@ def recv_build_invoice_data(sender, invoice, **kwargs):
 
 
 settings_hierarkey.add_default("zugferd_hide_label", "True", default_type=bool)
-settings_hierarkey.add_default(
-    "zugferd_include_delivery_date", "True", default_type=bool
-)

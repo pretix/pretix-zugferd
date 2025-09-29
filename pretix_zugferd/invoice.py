@@ -63,20 +63,21 @@ class ZugferdMixin:
         doc.header.type_code = "384" if invoice.is_cancellation else "380"
         doc.header.issue_date_time = invoice.date
 
+        all_lines = list(invoice.lines.all())
         lines_date_from = set(
-            line.event_date_from for line in invoice.lines.all() if line.event_date_from
+            line.period_start for line in all_lines if line.period_start
         )
         lines_date_to = set(
-            line.event_date_to or line.event_date_from
-            for line in invoice.lines.all()
-            if line.event_date_to or line.event_date_from
+            line.period_end or line.period_start
+            for line in all_lines
+            if line.period_end or line.period_start
         )
 
         # ITEMS
         taxvalue_map = defaultdict(Decimal)
         grossvalue_map = defaultdict(Decimal)
         total = Decimal("0.00")
-        for line in invoice.lines.all():
+        for line in all_lines:
             factor = -1 if line.gross_value < 0 else 1
             li = LineItem()
             exemption_reason = None
@@ -128,17 +129,12 @@ class ZugferdMixin:
                 li.settlement.trade_tax.exemption_reason = exemption_reason
             li.settlement.monetary_summation.total_amount = line.net_value
 
-            if invoice.event.settings.get(
-                "zugferd_include_delivery_date", as_type=bool
+            if line.period_start and (
+                len(lines_date_from) > 1 or len(lines_date_to) > 1
             ):
-                if line.event_date_from and (
-                    len(lines_date_from) > 1 or len(lines_date_to) > 1
-                ):
-                    # Only include line-level dates if there are different dates on the invoice
-                    li.settlement.period.start = line.event_date_from
-                    li.settlement.period.end = (
-                        line.event_date_to or line.event_date_from
-                    )
+                # Only include line-level dates if there are different dates on the invoice
+                li.settlement.period.start = line.period_start
+                li.settlement.period.end = line.period_end or line.period_start
 
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
@@ -248,22 +244,19 @@ class ZugferdMixin:
                 )
             )
 
-        if invoice.event.settings.get("zugferd_include_delivery_date", as_type=bool):
-            if lines_date_to:
-                delivery_start = min(lines_date_from)
-                delivery_end = max(lines_date_to)
-            else:
-                delivery_start = invoice.date
-                delivery_end = invoice.date
+        if lines_date_to:
+            delivery_start = min(lines_date_from)
+            delivery_end = max(lines_date_to)
+        else:  # fallback in case we have nothing else
+            delivery_start = invoice.date
+            delivery_end = invoice.date
 
-            # The legal delivery date is the date of "full" execution, so the date of the last event
-            doc.trade.delivery.event.occurrence = delivery_end
+        # The legal delivery date is the date of "full" execution, so the date of the last line being executed
+        doc.trade.delivery.event.occurrence = delivery_end
 
-            # Some recipients also require a billing period, which can include a date range
-            doc.trade.settlement.period.start = delivery_start
-            doc.trade.settlement.period.end = delivery_end
-        else:
-            doc.trade.delivery.event.occurrence = invoice.date
+        # Some recipients also require a billing period, which can include a date range
+        doc.trade.settlement.period.start = delivery_start
+        doc.trade.settlement.period.end = delivery_end
 
         note = IncludedNote()
         note.content = _("Order code: {code}").format(code=invoice.order.full_code)
