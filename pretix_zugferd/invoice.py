@@ -63,12 +63,13 @@ class ZugferdMixin:
         doc.header.type_code = "384" if invoice.is_cancellation else "380"
         doc.header.issue_date_time = invoice.date
 
+        all_lines = list(invoice.lines.all())
         lines_date_from = set(
-            line.period_start for line in invoice.lines.all() if line.period_start
+            line.period_start for line in all_lines if line.period_start
         )
         lines_date_to = set(
             line.period_end or line.period_start
-            for line in invoice.lines.all()
+            for line in all_lines
             if line.period_end or line.period_start
         )
 
@@ -76,7 +77,7 @@ class ZugferdMixin:
         taxvalue_map = defaultdict(Decimal)
         grossvalue_map = defaultdict(Decimal)
         total = Decimal("0.00")
-        for line in invoice.lines.all():
+        for line in all_lines:
             factor = -1 if line.gross_value < 0 else 1
             li = LineItem()
             exemption_reason = None
