@@ -181,6 +181,7 @@ class ZugferdMixin:
 
         if "zugferd" not in invoice.plugin_data:
             from .signals import recv_build_invoice_data
+
             recv_build_invoice_data(sender=invoice.event, invoice=invoice)
 
         zdata = invoice.plugin_data.get("zugferd", {})
