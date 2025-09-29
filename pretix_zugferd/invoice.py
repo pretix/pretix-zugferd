@@ -129,12 +129,12 @@ class ZugferdMixin:
                 li.settlement.trade_tax.exemption_reason = exemption_reason
             li.settlement.monetary_summation.total_amount = line.net_value
 
-            if line.period_start and (len(lines_date_from) > 1 or len(lines_date_to) > 1):
+            if line.period_start and (
+                len(lines_date_from) > 1 or len(lines_date_to) > 1
+            ):
                 # Only include line-level dates if there are different dates on the invoice
                 li.settlement.period.start = line.period_start
-                li.settlement.period.end = (
-                    line.period_end or line.period_start
-                )
+                li.settlement.period.end = line.period_end or line.period_start
 
             doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
