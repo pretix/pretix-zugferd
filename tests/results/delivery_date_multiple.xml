@@ -47,7 +47,7 @@
                 <ram:Name>Ticket</ram:Name>
                 <ram:Description>Ticket
 Attendee: Peter
-Date: Hamburg - Mon, July 31st, 2023 09:00</ram:Description>
+Date: Hamburg - Mon, July 31, 2023 09:00</ram:Description>
             </ram:SpecifiedTradeProduct>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
@@ -85,7 +85,7 @@ Date: Hamburg - Mon, July 31st, 2023 09:00</ram:Description>
                 <ram:Name>Ticket</ram:Name>
                 <ram:Description>Ticket
 Attendee: Peter
-Date: Berlin - Fri, Aug. 2nd, 2024 09:00</ram:Description>
+Date: Berlin - Fri, Aug. 2, 2024 09:00</ram:Description>
             </ram:SpecifiedTradeProduct>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
