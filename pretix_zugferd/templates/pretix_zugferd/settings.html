@@ -275,7 +275,7 @@
             <td>
                 {% if "sum_by_net" not in request.event.settings.tax_rounding %}
                     <span class="fa fa-fw fa-warning text-danger"></span>
-                    {% trans "Taxes are rounded by line by line." %}
+                    {% trans "Taxes are rounded line by line." %}
                     {% trans "This can cause invoices to be rejected as invalid by recipients." %}
                     {% trans "Please configure taxes to be rounded based on net total." %}
                     <a href="{% url "control:event.settings.tax" event=request.event.slug organizer=request.event.organizer.slug %}"
