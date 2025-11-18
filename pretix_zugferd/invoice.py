@@ -11,13 +11,6 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
 from django.utils.translation import gettext as _, pgettext
-from drafthorse.models.accounting import ApplicableTradeTax
-from drafthorse.models.document import Document
-from drafthorse.models.note import IncludedNote
-from drafthorse.models.party import TaxRegistration
-from drafthorse.models.payment import PaymentMeans, PaymentTerms
-from drafthorse.models.tradelines import LineItem
-from drafthorse.pdf import attach_xml
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
 from pretix.base.models import Order
 from pretix.base.models.tax import EU_COUNTRIES
@@ -45,6 +38,13 @@ class ZugferdMixin:
     re_leitweg_id = re.compile(r"^[019][0-9]{1,11}-[0-9A-Z]{1,30}-[0-9]{2}$")
 
     def _zugferd_generate_document(self, invoice):
+        from drafthorse.models.accounting import ApplicableTradeTax
+        from drafthorse.models.document import Document
+        from drafthorse.models.note import IncludedNote
+        from drafthorse.models.party import TaxRegistration
+        from drafthorse.models.payment import PaymentMeans, PaymentTerms
+        from drafthorse.models.tradelines import LineItem
+
         cc = invoice.event.currency
         doc = Document()
         if self.profile == "EXTENDED":
@@ -424,6 +424,8 @@ class ZugferdMixin:
             canvas.restoreState()
 
     def generate(self, invoice):
+        from drafthorse.pdf import attach_xml
+
         self.__zugferd = True
         self.invoice = invoice
         if (
