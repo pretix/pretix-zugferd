@@ -285,7 +285,12 @@ class ZugferdMixin:
         doc.header.notes.add(note)
 
         if invoice.internal_reference:
+            # Might later be overridden by Leitweg-ID
             doc.trade.agreement.buyer_reference = invoice.internal_reference
+
+            # Will always stay in this field
+            doc.trade.agreement.buyer_order.issuer_assigned_id = invoice.internal_reference
+
             note = IncludedNote()
             note.content = pgettext(
                 "invoice", "Customer reference: {reference}"
