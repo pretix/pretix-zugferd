@@ -289,7 +289,9 @@ class ZugferdMixin:
             doc.trade.agreement.buyer_reference = invoice.internal_reference
 
             # Will always stay in this field
-            doc.trade.agreement.buyer_order.issuer_assigned_id = invoice.internal_reference
+            doc.trade.agreement.buyer_order.issuer_assigned_id = (
+                invoice.internal_reference
+            )
 
             note = IncludedNote()
             note.content = pgettext(
