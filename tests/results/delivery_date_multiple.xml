@@ -153,6 +153,9 @@ Date: Berlin - Fri, Aug. 2, 2024 09:00</ram:Description>
                     <ram:ID schemeID="VA">DE987654321</ram:ID>
                 </ram:SpecifiedTaxRegistration>
             </ram:BuyerTradeParty>
+            <ram:BuyerOrderReferencedDocument>
+                <ram:IssuerAssignedID>PO-12345</ram:IssuerAssignedID>
+            </ram:BuyerOrderReferencedDocument>
         </ram:ApplicableHeaderTradeAgreement>
         <ram:ApplicableHeaderTradeDelivery>
             <ram:ActualDeliverySupplyChainEvent>
