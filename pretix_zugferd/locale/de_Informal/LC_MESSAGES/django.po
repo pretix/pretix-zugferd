@@ -34,7 +34,7 @@ msgstr "Weitere Informationen siehe Freitext-Notizen"
 #: pretix_zugferd/invoice.py:234
 #, python-brace-format
 msgid "Order code: {code}"
-msgstr "Rechnungsnummer: {code}"
+msgstr "Bestellnummer: {code}"
 
 #: pretix_zugferd/invoice.py:242
 #, python-brace-format
