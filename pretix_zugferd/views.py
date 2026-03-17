@@ -36,7 +36,7 @@ class SettingsView(EventSettingsViewMixin, EventSettingsFormView):
     model = Event
     form_class = ZugferdSettingsForm
     template_name = "pretix_zugferd/settings.html"
-    permission = "can_change_settings"
+    permission = "event.settings.invoicing:write"
 
     def get_success_url(self) -> str:
         return reverse(

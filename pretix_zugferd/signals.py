@@ -33,7 +33,10 @@ def register_3(sender, **kwargs):
 def navbar_info(sender, request, **kwargs):
     url = resolve(request.path_info)
     if not request.user.has_event_permission(
-        request.organizer, request.event, "can_change_event_settings", request=request
+        request.organizer,
+        request.event,
+        "event.settings.invoicing:write",
+        request=request,
     ):
         return []
     return [
