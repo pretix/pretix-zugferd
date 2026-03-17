@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from i18nfield.strings import LazyI18nString
@@ -11,7 +11,6 @@ from pretix.base.models import (
     OrderPosition,
     Organizer,
 )
-from pytz import UTC
 
 
 @pytest.fixture
