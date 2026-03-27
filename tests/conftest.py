@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from i18nfield.strings import LazyI18nString
