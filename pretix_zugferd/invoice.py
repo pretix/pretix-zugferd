@@ -2,7 +2,6 @@ import bleach
 import logging
 import os
 import re
-import sentry_sdk
 import subprocess
 import tempfile
 import unicodedata
@@ -451,14 +450,14 @@ class ZugferdMixin:
                 xml = self._zugferd_generate_document(invoice).serialize(
                     schema="FACTUR-X_" + self.schema
                 )
-            except Exception as e:
+            except Exception:
                 self.__zugferd = False
-                logger.exception(
+                logger.critical(
                     "Could not generate ZUGFeRD data for invoice {}".format(
                         invoice.number
-                    )
+                    ),
+                    exc_info=True
                 )
-                sentry_sdk.capture_exception(e)
 
         fname, ftype, content = super().generate(invoice)
 
