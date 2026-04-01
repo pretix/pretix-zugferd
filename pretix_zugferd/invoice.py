@@ -456,7 +456,7 @@ class ZugferdMixin:
                     "Could not generate ZUGFeRD data for invoice {}".format(
                         invoice.number
                     ),
-                    exc_info=True
+                    exc_info=True,
                 )
 
         fname, ftype, content = super().generate(invoice)
