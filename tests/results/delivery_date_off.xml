@@ -61,7 +61,7 @@ Attendee: Peter</ram:Description>
                 <ram:ApplicableTradeTax>
                     <ram:TypeCode>VAT</ram:TypeCode>
                     <ram:CategoryCode>S</ram:CategoryCode>
-                    <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+                    <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
                 </ram:ApplicableTradeTax>
                 <ram:SpecifiedTradeSettlementLineMonetarySummation>
                     <ram:LineTotalAmount>19.33</ram:LineTotalAmount>
@@ -134,7 +134,7 @@ Attendee: Peter</ram:Description>
                 <ram:TypeCode>VAT</ram:TypeCode>
                 <ram:BasisAmount>19.33</ram:BasisAmount>
                 <ram:CategoryCode>S</ram:CategoryCode>
-                <ram:RateApplicablePercent>19.00</ram:RateApplicablePercent>
+                <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
             </ram:ApplicableTradeTax>
             <ram:BillingSpecifiedPeriod>
                 <ram:StartDateTime>
