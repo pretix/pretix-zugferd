@@ -52,11 +52,11 @@ Date: Hamburg - Mon, July 31, 2023 09:00</ram:Description>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
                     <ram:ChargeAmount>10.9200</ram:ChargeAmount>
-                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                    <ram:BasisQuantity unitCode="H87">1.0000</ram:BasisQuantity>
                 </ram:NetPriceProductTradePrice>
             </ram:SpecifiedLineTradeAgreement>
             <ram:SpecifiedLineTradeDelivery>
-                <ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity>
+                <ram:BilledQuantity unitCode="H87">1.0000</ram:BilledQuantity>
             </ram:SpecifiedLineTradeDelivery>
             <ram:SpecifiedLineTradeSettlement>
                 <ram:ApplicableTradeTax>
@@ -90,11 +90,11 @@ Date: Berlin - Fri, Aug. 2, 2024 09:00</ram:Description>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
                     <ram:ChargeAmount>8.4000</ram:ChargeAmount>
-                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                    <ram:BasisQuantity unitCode="H87">1.0000</ram:BasisQuantity>
                 </ram:NetPriceProductTradePrice>
             </ram:SpecifiedLineTradeAgreement>
             <ram:SpecifiedLineTradeDelivery>
-                <ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity>
+                <ram:BilledQuantity unitCode="H87">1.0000</ram:BilledQuantity>
             </ram:SpecifiedLineTradeDelivery>
             <ram:SpecifiedLineTradeSettlement>
                 <ram:ApplicableTradeTax>

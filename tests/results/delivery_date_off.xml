@@ -51,11 +51,11 @@ Attendee: Peter</ram:Description>
             <ram:SpecifiedLineTradeAgreement>
                 <ram:NetPriceProductTradePrice>
                     <ram:ChargeAmount>19.3300</ram:ChargeAmount>
-                    <ram:BasisQuantity unitCode="C62">1.0000</ram:BasisQuantity>
+                    <ram:BasisQuantity unitCode="H87">1.0000</ram:BasisQuantity>
                 </ram:NetPriceProductTradePrice>
             </ram:SpecifiedLineTradeAgreement>
             <ram:SpecifiedLineTradeDelivery>
-                <ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity>
+                <ram:BilledQuantity unitCode="H87">1.0000</ram:BilledQuantity>
             </ram:SpecifiedLineTradeDelivery>
             <ram:SpecifiedLineTradeSettlement>
                 <ram:ApplicableTradeTax>

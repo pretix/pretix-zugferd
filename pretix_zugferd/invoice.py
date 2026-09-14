@@ -120,8 +120,8 @@ class ZugferdMixin:
             li.product.description = desc
             # For negative amounts, only the billed quantity may be negative, not the base price per quantity
             li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
-            li.agreement.net.basis_quantity = (Decimal("1.0000"), "C62")
-            li.delivery.billed_quantity = (Decimal("1.0000") * factor, "C62")
+            li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
+            li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
             li.settlement.trade_tax.type_code = "VAT"
             li.settlement.trade_tax.category_code = category
             li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
