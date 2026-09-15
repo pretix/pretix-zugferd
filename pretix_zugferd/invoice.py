@@ -1,14 +1,13 @@
 import bleach
 import logging
 import os
+import pycountry
 import re
 import subprocess
 import tempfile
 import unicodedata
 from collections import defaultdict
 from decimal import Decimal
-
-import pycountry
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
