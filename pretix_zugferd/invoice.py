@@ -55,14 +55,11 @@ class ZugferdMixin:
             )
             doc.header.name = "RECHNUNG"
 
-            try:
-                # ZUGFeRD mandates 639-2, which is the three-letter code. pycountry supports only 639-3, but that
-                # fortunately is a superset of 639-2, so we should be fine.
-                language_code = pycountry.languages.get(alpha_2=invoice.locale[:2]).alpha_3
-                doc.header.languages.add(language_code)
-            except:
-                # Non-standard language code, ignore
-                pass
+            # ZUGFeRD mandates 639-2, which is the three-letter code. pycountry supports only 639-3, but that
+            # fortunately is a superset of 639-2, so we should be fine.
+            language = pycountry.languages.get(alpha_2=invoice.locale[:2])
+            if language:
+                doc.header.languages.add(language.alpha_3)
         if self.business_process_id:
             doc.context.business_parameter.id = self.business_process_id
         doc.context.guideline_parameter.id = self.guideline_id
