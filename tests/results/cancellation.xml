@@ -18,7 +18,7 @@
         <ram:IssueDateTime>
             <udt:DateTimeString format="102">20241214</udt:DateTimeString>
         </ram:IssueDateTime>
-        <ram:LanguageID>en</ram:LanguageID>
+        <ram:LanguageID>eng</ram:LanguageID>
         <ram:IncludedNote>
             <ram:Content>Order code: DUMMY-FOO</ram:Content>
         </ram:IncludedNote>
