@@ -7,6 +7,8 @@ import tempfile
 import unicodedata
 from collections import defaultdict
 from decimal import Decimal
+
+import pycountry
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
@@ -52,7 +54,15 @@ class ZugferdMixin:
                 invoice.invoice_no == "PREVIEW" or invoice.order.testmode
             )
             doc.header.name = "RECHNUNG"
-            doc.header.languages.add(invoice.locale[:2])
+
+            try:
+                # ZUGFeRD mandates 639-2, which is the three-letter code. pycountry supports only 639-3, but that
+                # fortunately is a superset of 639-2, so we should be fine.
+                language_code = pycountry.languages.get(alpha_2=invoice.locale[:2]).alpha_3
+                doc.header.languages.add(language_code)
+            except:
+                # Non-standard language code, ignore
+                pass
         if self.business_process_id:
             doc.context.business_parameter.id = self.business_process_id
         doc.context.guideline_parameter.id = self.guideline_id
