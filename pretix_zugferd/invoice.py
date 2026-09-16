@@ -1,6 +1,7 @@
 import bleach
 import logging
 import os
+import pycountry
 import re
 import subprocess
 import tempfile
@@ -52,7 +53,12 @@ class ZugferdMixin:
                 invoice.invoice_no == "PREVIEW" or invoice.order.testmode
             )
             doc.header.name = "RECHNUNG"
-            doc.header.languages.add(invoice.locale[:2])
+
+            # ZUGFeRD mandates 639-2, which is the three-letter code. pycountry supports only 639-3, but that
+            # fortunately is a superset of 639-2, so we should be fine.
+            language = pycountry.languages.get(alpha_2=invoice.locale[:2])
+            if language:
+                doc.header.languages.add(language.alpha_3)
         if self.business_process_id:
             doc.context.business_parameter.id = self.business_process_id
         doc.context.guideline_parameter.id = self.guideline_id
