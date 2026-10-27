@@ -1,3 +1,6 @@
+import base64
+import inspect
+
 import bleach
 import logging
 import os
@@ -8,6 +11,7 @@ import tempfile
 import unicodedata
 from collections import defaultdict
 from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
@@ -17,6 +21,8 @@ from pretix.base.models import Order
 from pretix.base.models.tax import EU_COUNTRIES
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
+
+from pretix.base.templatetags.money import tax_rate_format
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +44,8 @@ class ZugferdMixin:
     # as per https://xeinkauf.de/app/uploads/2022/11/Leitweg-ID-Formatspezifikation-v2-0-2-1.pdf
     re_leitweg_id = re.compile(r"^[019][0-9]{1,11}-[0-9A-Z]{1,30}-[0-9]{2}$")
 
-    def _zugferd_generate_document(self, invoice):
+    def _zugferd_generate_document(self, invoice, raw_pdf):
+        from drafthorse.models.references import AdditionalReferencedDocument
         from drafthorse.models.accounting import ApplicableTradeTax
         from drafthorse.models.document import Document
         from drafthorse.models.note import IncludedNote
@@ -79,13 +86,40 @@ class ZugferdMixin:
             if line.period_end or line.period_start
         )
 
+        gross_price_hack = invoice.order.tax_rounding_mode == "sum_by_gross" and raw_pdf
+        """
+        If the invoice is computed on gross price, we cannot list the invoice lines, because we can only give net
+        prices for the individual lines, which would mean that the maximum rounding error would be 0.01 *per line*
+        instead of 0.01 in total. So BMF currently allows to just sum them up in one line, if we include an attachment
+        listing the actual lines. This *needs* to be a ZUGFeRD *attachment*, not some text format, so our easiest
+        (but very funny) way is to just include the same PDF a second time.
+
+        The sums in the document will not match the algorithm from EN16931 exactly, but the newest EN16931 allows a slack
+        of up to 0.02 in all computations and our maximum difference is 0.01 per tax category.
+
+        "Für die Formate XRechnung und ZUGFeRD ist derzeit noch kein Bruttorechnungs-Format ver-
+        fügbar. Daher wird es für E-Rechnungen nach der Normenreihe EN 16931, die auf Bruttopreisen
+        beruhen und die bis zum 31. Dezember 2027 ausgestellt werden, nicht beanstandet, wenn im
+        strukturierten Teil statt einer vollständigen Leistungsbeschreibung mit Einzelpositionen nur die
+        Gesamtsummen der nach Steuersätzen und einzelnen Steuerbefreiungen aufgeschlüsselten Ent-
+        gelte, der jeweilige Steuersatz und der entsprechende Steuerbetrag bzw. ein Hinweis auf die Steu-
+        erbefreiung aufgeführt wird. In diesem Fall muss aus einer – menschenlesbaren – eingebetteten
+        Anlage eine ordnungsmäßige Leistungsbeschreibung mit den Einzelpositionen enthalten sein,
+        aus der sich die Gesamtsummen im strukturierten Teil ergeben und auf die im strukturierten
+        Teil eindeutig hinzuweisen ist."
+
+        Source: BMF-Schreiben "Betreff: Einführung der obligatorischen elektronischen Rechnung bei Umsätzen zwischen inländischen Unternehmern ab dem 1. Januar 2025" vom "15. Oktober 2026"
+        https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf?__blob=publicationFile&v=2
+
+        Unclear is whether we can skip this if there is only one line.
+        """
+
         # ITEMS
         taxvalue_map = defaultdict(Decimal)
         grossvalue_map = defaultdict(Decimal)
         total = Decimal("0.00")
         for line in all_lines:
             factor = -1 if line.gross_value < 0 else 1
-            li = LineItem()
             exemption_reason = None
 
             if line.tax_code:
@@ -118,36 +152,79 @@ class ZugferdMixin:
                     )
             else:
                 category = "S"  # Assume standard rate
-            li.document.line_id = str(line.position + 1)
-            desc = remove_control_characters(
-                bleach.clean(line.description.replace("<br />", "\n"), tags=set())
-            )
-            li.product.name = desc.split("\n")[0]
-            li.product.description = desc
-            # For negative amounts, only the billed quantity may be negative, not the base price per quantity
-            li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
-            li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
-            li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
-            li.settlement.trade_tax.type_code = "VAT"
-            li.settlement.trade_tax.category_code = category
-            li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
-            if exemption_reason:
-                li.settlement.trade_tax.exemption_reason = exemption_reason
-            li.settlement.monetary_summation.total_amount = line.net_value
-
-            if line.period_start and (
-                len(lines_date_from) > 1 or len(lines_date_to) > 1
-            ):
-                # Only include line-level dates if there are different dates on the invoice
-                li.settlement.period.start = line.period_start
-                li.settlement.period.end = line.period_end or line.period_start
-
-            doc.trade.items.add(li)
             taxvalue_map[line.tax_rate, category, exemption_reason] += line.tax_value
             grossvalue_map[
                 line.tax_rate, category, exemption_reason
             ] += line.gross_value
             total += line.gross_value
+
+            if not gross_price_hack:
+                li = LineItem()
+                li.document.line_id = str(line.position + 1)
+                desc = remove_control_characters(
+                    bleach.clean(line.description.replace("<br />", "\n"), tags=set())
+                )
+                li.product.name = desc.split("\n")[0]
+                li.product.description = desc
+                # For negative amounts, only the billed quantity may be negative, not the base price per quantity
+                li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
+                li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
+                li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
+                li.settlement.trade_tax.type_code = "VAT"
+                li.settlement.trade_tax.category_code = category
+                li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
+                if exemption_reason:
+                    li.settlement.trade_tax.exemption_reason = exemption_reason
+                li.settlement.monetary_summation.total_amount = line.net_value
+
+                if line.period_start and (
+                    len(lines_date_from) > 1 or len(lines_date_to) > 1
+                ):
+                    # Only include line-level dates if there are different dates on the invoice
+                    li.settlement.period.start = line.period_start
+                    li.settlement.period.end = line.period_end or line.period_start
+
+                doc.trade.items.add(li)
+
+        if gross_price_hack:
+            for (i, ((tax_rate, category, exemption_reason), gross_value)) in enumerate(grossvalue_map.items()):
+                tax_value = taxvalue_map[tax_rate, category, exemption_reason]
+                factor = -1 if gross_value < 0 else 1
+                li = LineItem()
+                li.document.line_id = str(i + 1)
+                if exemption_reason:
+                    li.product.name = pgettext("invoice", "Products or services with a tax rate of {tax_rate} % and exemption reason {reason}").format(
+                        tax_rate=tax_rate_format(tax_rate),
+                        reason=exemption_reason,
+                    )
+                else:
+                    li.product.name = pgettext("invoice", "Products or services with a tax rate of {tax_rate} %").format(tax_rate=tax_rate_format(tax_rate))
+
+                li.product.description = pgettext(
+                    "invoice",
+                    "The detailed products and services are listed in the embedded human-readable invoice copy. "
+                    "The tax amounts in this invoice have been computed from gross prices. To represent this in ZUGFeRD format, "
+                    "all products and services of the same tax rate have been summarized in one line, in compliance with the "
+                    "circular published by the German Federal Ministry of Finance (BMF) on 15 October 2026. "
+                )
+                # For negative amounts, only the billed quantity may be negative, not the base price per quantity
+                li.agreement.net.amount = abs(gross_value - tax_value).quantize(Decimal("0.0001"))
+                li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
+                li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
+                li.settlement.trade_tax.type_code = "VAT"
+                li.settlement.trade_tax.category_code = category
+                li.settlement.trade_tax.rate_applicable_percent = tax_rate
+                if exemption_reason:
+                    li.settlement.trade_tax.exemption_reason = exemption_reason
+                li.settlement.monetary_summation.total_amount = gross_value - tax_value
+                doc.trade.items.add(li)
+
+            ard = AdditionalReferencedDocument()
+            ard.issuer_assigned_id = invoice.full_invoice_no
+            ard.type_code = "916"  # Seems to be fixed in the spec, not very clear
+            ard.name = pgettext("invoice", "Human-readable invoice with detailed list of products and services")
+            ard.attached_object = ('application/pdf', 'invoice-human-readable.pdf', base64.b64encode(raw_pdf).decode())
+            doc.trade.agreement.additional_references.add(ard)
 
         doc.trade.agreement.seller.name = remove_control_characters(
             invoice.invoice_from_name
@@ -451,11 +528,16 @@ class ZugferdMixin:
             # It's not possible to generate a valid ZUGFeRD invoice with the recipient in a non-standard country code (e.g. Kosovo)
             self.__zugferd = False
 
+        fname, ftype, content = super().generate(invoice)
+
         if self.__zugferd:
             try:
-                xml = self._zugferd_generate_document(invoice).serialize(
-                    schema="FACTUR-X_" + self.schema
-                )
+                if 'raw_pdf' in inspect.signature(self._zugferd_generate_document).parameters:
+                    doc = self._zugferd_generate_document(invoice, raw_pdf=content)
+                else:
+                    # Backwards compat with subclasses that do not support the new parameter
+                    doc = self._zugferd_generate_document(invoice)
+                xml = doc.serialize(schema="FACTUR-X_" + self.schema)
             except Exception:
                 self.__zugferd = False
                 logger.critical(
@@ -464,10 +546,8 @@ class ZugferdMixin:
                     ),
                     exc_info=True,
                 )
-
-        fname, ftype, content = super().generate(invoice)
-
-        if not self.__zugferd:
+                return fname, ftype, content
+        else:
             return fname, ftype, content
 
         with tempfile.TemporaryDirectory() as tdir:
@@ -534,8 +614,8 @@ class Modern1ZugferdXRechnungInvoiceRenderer(ZugferdMixin, Modern1Renderer):
         str,
     )
 
-    def _zugferd_generate_document(self, invoice):
-        doc = super()._zugferd_generate_document(invoice)
+    def _zugferd_generate_document(self, invoice, raw_pdf):
+        doc = super()._zugferd_generate_document(invoice, raw_pdf)
         if self.event.settings.invoice_address_custom_field:
             doc.trade.agreement.buyer_reference = invoice.custom_field or "unknown"
         elif not doc.trade.agreement.buyer_reference:

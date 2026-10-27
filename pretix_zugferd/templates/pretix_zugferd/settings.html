@@ -273,7 +273,19 @@
         <tr>
             <td>{% trans "Rounding" %}</td>
             <td>
-                {% if "sum_by_net" not in request.event.settings.tax_rounding %}
+                {% if "sum_by_net" in request.event.settings.tax_rounding %}
+                    <span class="fa fa-fw fa-check-circle text-success"></span>
+                    {% trans "Configuration is set." %}
+                {% elif "sum_by_gross" in request.event.settings.tax_rounding %}
+                    <span class="fa fa-fw fa-info-circle text-info"></span>
+                    {% trans "Taxes are rounded by gross price." %}
+                    {% trans "This is explicitly permitted by the German Ministry of Finance (BMF) until the end of 2027 through their letter from 15 October 2026." %}
+                    {% trans "It might, however, cause issues in other countries or with recipients who have not updated their validation logic to allow small rounding differences." %}
+                    <a href="{% url "control:event.settings.tax" event=request.event.slug organizer=request.event.organizer.slug %}"
+                       class="btn btn-default btn-xs">
+                        {% trans "Change" %}
+                    </a>
+                {% else %}
                     <span class="fa fa-fw fa-warning text-danger"></span>
                     {% trans "Taxes are rounded line by line." %}
                     {% trans "This can cause invoices to be rejected as invalid by recipients." %}
@@ -282,9 +294,6 @@
                        class="btn btn-default btn-xs">
                         {% trans "Change" %}
                     </a>
-                {% else %}
-                    <span class="fa fa-fw fa-check-circle text-success"></span>
-                    {% trans "Configuration is set." %}
                 {% endif %}
             </td>
         </tr>
