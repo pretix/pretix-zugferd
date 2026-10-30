@@ -1,7 +1,6 @@
 import base64
-import inspect
-
 import bleach
+import inspect
 import logging
 import os
 import pycountry
@@ -11,7 +10,6 @@ import tempfile
 import unicodedata
 from collections import defaultdict
 from decimal import Decimal
-
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.utils.functional import lazy
@@ -19,10 +17,9 @@ from django.utils.translation import gettext as _, pgettext
 from pretix.base.invoice import ClassicInvoiceRenderer, Modern1Renderer
 from pretix.base.models import Order
 from pretix.base.models.tax import EU_COUNTRIES
+from pretix.base.templatetags.money import tax_rate_format
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
-
-from pretix.base.templatetags.money import tax_rate_format
 
 logger = logging.getLogger(__name__)
 
@@ -45,12 +42,12 @@ class ZugferdMixin:
     re_leitweg_id = re.compile(r"^[019][0-9]{1,11}-[0-9A-Z]{1,30}-[0-9]{2}$")
 
     def _zugferd_generate_document(self, invoice, raw_pdf):
-        from drafthorse.models.references import AdditionalReferencedDocument
         from drafthorse.models.accounting import ApplicableTradeTax
         from drafthorse.models.document import Document
         from drafthorse.models.note import IncludedNote
         from drafthorse.models.party import TaxRegistration
         from drafthorse.models.payment import PaymentMeans, PaymentTerms
+        from drafthorse.models.references import AdditionalReferencedDocument
         from drafthorse.models.tradelines import LineItem
 
         cc = invoice.event.currency
@@ -108,7 +105,8 @@ class ZugferdMixin:
         aus der sich die Gesamtsummen im strukturierten Teil ergeben und auf die im strukturierten
         Teil eindeutig hinzuweisen ist."
 
-        Source: BMF-Schreiben "Betreff: Einführung der obligatorischen elektronischen Rechnung bei Umsätzen zwischen inländischen Unternehmern ab dem 1. Januar 2025" vom "15. Oktober 2026"
+        Source: BMF-Schreiben "Betreff: Einführung der obligatorischen elektronischen Rechnung bei Umsätzen zwischen
+        inländischen Unternehmern ab dem 1. Januar 2025" vom "15. Oktober 2026"
         https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf?__blob=publicationFile&v=2
 
         Unclear is whether we can skip this if there is only one line.
@@ -167,7 +165,9 @@ class ZugferdMixin:
                 li.product.name = desc.split("\n")[0]
                 li.product.description = desc
                 # For negative amounts, only the billed quantity may be negative, not the base price per quantity
-                li.agreement.net.amount = abs(line.net_value).quantize(Decimal("0.0001"))
+                li.agreement.net.amount = abs(line.net_value).quantize(
+                    Decimal("0.0001")
+                )
                 li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
                 li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
                 li.settlement.trade_tax.type_code = "VAT"
@@ -187,28 +187,38 @@ class ZugferdMixin:
                 doc.trade.items.add(li)
 
         if gross_price_hack:
-            for (i, ((tax_rate, category, exemption_reason), gross_value)) in enumerate(grossvalue_map.items()):
+            for i, ((tax_rate, category, exemption_reason), gross_value) in enumerate(
+                grossvalue_map.items()
+            ):
                 tax_value = taxvalue_map[tax_rate, category, exemption_reason]
                 factor = -1 if gross_value < 0 else 1
                 li = LineItem()
                 li.document.line_id = str(i + 1)
                 if exemption_reason:
-                    li.product.name = pgettext("invoice", "Products or services with a tax rate of {tax_rate} % and exemption reason {reason}").format(
+                    li.product.name = pgettext(
+                        "invoice",
+                        "Products or services with a tax rate of {tax_rate} % and exemption reason {reason}",
+                    ).format(
                         tax_rate=tax_rate_format(tax_rate),
                         reason=exemption_reason,
                     )
                 else:
-                    li.product.name = pgettext("invoice", "Products or services with a tax rate of {tax_rate} %").format(tax_rate=tax_rate_format(tax_rate))
+                    li.product.name = pgettext(
+                        "invoice",
+                        "Products or services with a tax rate of {tax_rate} %",
+                    ).format(tax_rate=tax_rate_format(tax_rate))
 
                 li.product.description = pgettext(
                     "invoice",
                     "The detailed products and services are listed in the embedded human-readable invoice copy. "
                     "The tax amounts in this invoice have been computed from gross prices. To represent this in ZUGFeRD format, "
                     "all products and services of the same tax rate have been summarized in one line, in compliance with the "
-                    "circular published by the German Federal Ministry of Finance (BMF) on 15 October 2026. "
+                    "circular published by the German Federal Ministry of Finance (BMF) on 15 October 2026. ",
                 )
                 # For negative amounts, only the billed quantity may be negative, not the base price per quantity
-                li.agreement.net.amount = abs(gross_value - tax_value).quantize(Decimal("0.0001"))
+                li.agreement.net.amount = abs(gross_value - tax_value).quantize(
+                    Decimal("0.0001")
+                )
                 li.agreement.net.basis_quantity = (Decimal("1.0000"), "H87")
                 li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
                 li.settlement.trade_tax.type_code = "VAT"
@@ -222,8 +232,15 @@ class ZugferdMixin:
             ard = AdditionalReferencedDocument()
             ard.issuer_assigned_id = invoice.full_invoice_no
             ard.type_code = "916"  # Seems to be fixed in the spec, not very clear
-            ard.name = pgettext("invoice", "Human-readable invoice with detailed list of products and services")
-            ard.attached_object = ('application/pdf', 'invoice-human-readable.pdf', base64.b64encode(raw_pdf).decode())
+            ard.name = pgettext(
+                "invoice",
+                "Human-readable invoice with detailed list of products and services",
+            )
+            ard.attached_object = (
+                "application/pdf",
+                "invoice-human-readable.pdf",
+                base64.b64encode(raw_pdf).decode(),
+            )
             doc.trade.agreement.additional_references.add(ard)
 
         doc.trade.agreement.seller.name = remove_control_characters(
@@ -532,7 +549,10 @@ class ZugferdMixin:
 
         if self.__zugferd:
             try:
-                if 'raw_pdf' in inspect.signature(self._zugferd_generate_document).parameters:
+                if (
+                    "raw_pdf"
+                    in inspect.signature(self._zugferd_generate_document).parameters
+                ):
                     doc = self._zugferd_generate_document(invoice, raw_pdf=content)
                 else:
                     # Backwards compat with subclasses that do not support the new parameter
