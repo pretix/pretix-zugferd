@@ -34,7 +34,7 @@
         <tr>
             <td>{% trans "Invoice generation" %}</td>
             <td>
-                {% if not request.event.settings.invoice_generate %}
+                {% if request.event.settings.invoice_generate == "False" %}
                     <span class="fa fa-fw fa-warning text-danger" aria-hidden="true"></span>
                     {% trans "Invoice generation is not enabled for your event." %}
                     {% trans "ZUGFeRD invoices cannot be created." %}
