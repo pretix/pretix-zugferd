@@ -1,4 +1,6 @@
 import base64
+from datetime import datetime
+
 import bleach
 import inspect
 import logging
@@ -484,6 +486,16 @@ class ZugferdMixin:
             )
             doc.trade.settlement.invoice_referenced_document.issue_date_time = (
                 invoice.refers.date
+            )
+        elif "pretixpos" in invoice.plugin_data:
+            doc.trade.settlement.invoice_referenced_document.issuer_assigned_id = (
+                "{}/{}".format(
+                    invoice.plugin_data["pretixpos"]["pos_id"],
+                    invoice.plugin_data["pretixpos"]["receipt_id"],
+                )
+            )
+            doc.trade.settlement.invoice_referenced_document.issue_date_time = (
+                datetime.fromisoformat(invoice.plugin_data["pretixpos"]["receipt_date"])
             )
 
         taxtotal = Decimal(0)

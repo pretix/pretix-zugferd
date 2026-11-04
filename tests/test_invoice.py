@@ -299,3 +299,22 @@ def test_gross_rounding_exception(event, order, item, tax_rule):
         xml,
     )
     compare(xml, r("gross_rounding_exception.xml"), schema="FACTUR-X_EXTENDED")
+
+
+@pytest.mark.django_db
+@scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
+def test_render_default_zugferd(event, order):
+    event.settings.invoice_renderer = "modern1_zugferd"
+    i = generate_invoice(order)
+    i.plugin_data = {
+        "pretixpos": {"pos_id": 1, "receipt_id": 5, "receipt_date": "2026-11-04T10:58:14Z"}
+    }
+    i.save()
+    invoice_pdf_task(i.pk)
+    i.refresh_from_db()
+    reader = PdfReader(i.file)
+    xml = reader.attachments["factur-x.xml"][0]
+    assert xml.startswith(b"<?xml")
+
+    compare(xml, r("pretixpos.xml"), schema="FACTUR-X_EXTENDED")
