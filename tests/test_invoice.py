@@ -246,3 +246,23 @@ def test_cancellation(event, order):
     xml = reader.attachments["factur-x.xml"][0]
 
     compare(xml, r("cancellation.xml"), schema="FACTUR-X_EXTENDED")
+
+
+@pytest.mark.django_db
+@scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
+def test_tax_code_not_subject_to_vat(event, order, tax_rule):
+    tax_rule.code = "O/VATEX-EU-O"
+    tax_rule.rate = Decimal("0.00")
+    tax_rule.save()
+    op = order.positions.first()
+    op._calculate_tax()
+    op.save()
+    event.settings.invoice_renderer = "modern1_zugferd"
+    i = generate_invoice(order)
+    invoice_pdf_task(i.pk)
+    i.refresh_from_db()
+    reader = PdfReader(i.file)
+    xml = reader.attachments["factur-x.xml"][0]
+
+    compare(xml, r("tax_code_not_subject.xml"), schema="FACTUR-X_EXTENDED")
