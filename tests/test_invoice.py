@@ -304,7 +304,7 @@ def test_gross_rounding_exception(event, order, item, tax_rule):
 @pytest.mark.django_db
 @scopes_disabled()
 @freeze_time("2024-12-14 12:00:00+01:00")
-def test_render_default_zugferd(event, order):
+def test_render_pretixpos(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
     i.plugin_data = {
