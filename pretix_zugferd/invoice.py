@@ -130,7 +130,9 @@ class ZugferdMixin:
             li.delivery.billed_quantity = (Decimal("1.0000") * factor, "H87")
             li.settlement.trade_tax.type_code = "VAT"
             li.settlement.trade_tax.category_code = category
-            li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
+            # BR-O-5: An Invoice line where the VAT category code is "Not subject to VAT" shall not contain an Invoiced item VAT rate.
+            if category != "O":
+                li.settlement.trade_tax.rate_applicable_percent = line.tax_rate
             if exemption_reason:
                 li.settlement.trade_tax.exemption_reason = exemption_reason
             li.settlement.monetary_summation.total_amount = line.net_value
