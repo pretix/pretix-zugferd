@@ -1,22 +1,20 @@
 import json
 import os
-import re
-
 import pytest
+import re
 import zoneinfo
 from datetime import datetime
 from decimal import Decimal
 from django_scopes import scopes_disabled
 from freezegun import freeze_time
-from pretix.base.models import OrderPosition
 from pretix.base.services.invoices import (
     generate_cancellation,
     generate_invoice,
     invoice_pdf_task,
 )
+from pretix.base.services.orders import OrderChangeManager
 from pypdf import PdfReader
 
-from pretix.base.services.orders import OrderChangeManager
 from .utils import compare
 
 
@@ -298,6 +296,6 @@ def test_gross_rounding_exception(event, order, item, tax_rule):
     xml = re.sub(
         b'<ram:AttachmentBinaryObject mimeCode="application/pdf" filename="invoice-human-readable.pdf">.*</ram:AttachmentBinaryObject>',
         b'<ram:AttachmentBinaryObject mimeCode="application/pdf" filename="invoice-human-readable.pdf">PDF_VALUE_HERE</ram:AttachmentBinaryObject>',
-        xml
+        xml,
     )
     compare(xml, r("gross_rounding_exception.xml"), schema="FACTUR-X_EXTENDED")
