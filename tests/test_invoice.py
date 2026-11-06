@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+import re
 import zoneinfo
 from datetime import datetime
 from decimal import Decimal
@@ -11,6 +12,7 @@ from pretix.base.services.invoices import (
     generate_invoice,
     invoice_pdf_task,
 )
+from pretix.base.services.orders import OrderChangeManager
 from pypdf import PdfReader
 
 from .utils import compare
@@ -266,3 +268,34 @@ def test_tax_code_not_subject_to_vat(event, order, tax_rule):
     xml = reader.attachments["factur-x.xml"][0]
 
     compare(xml, r("tax_code_not_subject.xml"), schema="FACTUR-X_EXTENDED")
+
+
+@pytest.mark.django_db
+@scopes_disabled()
+@freeze_time("2024-12-14 12:00:00+01:00")
+def test_gross_rounding_exception(event, order, item, tax_rule):
+    event.settings.invoice_renderer = "modern1_zugferd"
+    with scopes_disabled():
+        order.tax_rounding_mode = "sum_by_gross"
+        order.save()
+        q = event.quotas.create(name="Foo", size=None)
+        q.items.add(item)
+        ocm = OrderChangeManager(order, notify=False, reissue_invoice=False)
+        ocm.cancel(order.positions.first())
+        ocm.add_position(item, None, price=Decimal("7.50"))
+        ocm.add_position(item, None, price=Decimal("7.50"))
+        ocm.commit()
+        order.refresh_from_db()
+        assert order.total == Decimal("15.00")
+    i = generate_invoice(order)
+    invoice_pdf_task(i.pk)
+    i.refresh_from_db()
+    reader = PdfReader(i.file)
+    xml = reader.attachments["factur-x.xml"][0]
+
+    xml = re.sub(
+        b'<ram:AttachmentBinaryObject mimeCode="application/pdf" filename="invoice-human-readable.pdf">.*</ram:AttachmentBinaryObject>',
+        b'<ram:AttachmentBinaryObject mimeCode="application/pdf" filename="invoice-human-readable.pdf">PDF_VALUE_HERE</ram:AttachmentBinaryObject>',
+        xml,
+    )
+    compare(xml, r("gross_rounding_exception.xml"), schema="FACTUR-X_EXTENDED")
