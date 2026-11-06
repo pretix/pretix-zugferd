@@ -308,7 +308,11 @@ def test_render_pretixpos(event, order):
     event.settings.invoice_renderer = "modern1_zugferd"
     i = generate_invoice(order)
     i.plugin_data = {
-        "pretixpos": {"pos_id": 1, "receipt_id": 5, "receipt_date": "2026-11-04T10:58:14Z"}
+        "pretixpos": {
+            "pos_id": 1,
+            "receipt_id": 5,
+            "receipt_date": "2026-11-04T10:58:14Z",
+        }
     }
     i.save()
     invoice_pdf_task(i.pk)

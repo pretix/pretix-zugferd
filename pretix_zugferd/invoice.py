@@ -1,6 +1,4 @@
 import base64
-from datetime import datetime
-
 import bleach
 import inspect
 import logging
@@ -11,6 +9,7 @@ import subprocess
 import tempfile
 import unicodedata
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 from django.conf import settings
 from django.contrib.staticfiles import finders
