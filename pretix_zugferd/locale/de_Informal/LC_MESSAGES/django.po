@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:41+0100\n"
+"POT-Creation-Date: 2026-11-25 17:03+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Raphael Michel <michel@rami.io>\n"
 "Language-Team: \n"
@@ -10,7 +10,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.10\n"
 
 #: pretix_zugferd/apps.py:13
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:5
@@ -26,17 +26,57 @@ msgstr ""
 "Rechnungen mit ZUGFeRD-Daten bereichert werden, einem Format für "
 "strukturierte Rechnungen in Deutschland."
 
-#: pretix_zugferd/invoice.py:93
+#: pretix_zugferd/invoice.py:150
 msgctxt "zugferd"
 msgid "See invoice notes for more information"
 msgstr "Weitere Informationen siehe Freitext-Notizen"
 
-#: pretix_zugferd/invoice.py:234
+#: pretix_zugferd/invoice.py:203
+#, python-brace-format
+msgctxt "invoice"
+msgid ""
+"Products or services with a tax rate of {tax_rate} % and exemption reason "
+"{reason}"
+msgstr ""
+"Produkte oder Leistungen mit einem Steuersatz von {tax_rate} % und "
+"Befreiungsgrund {reason}"
+
+#: pretix_zugferd/invoice.py:211
+#, python-brace-format
+msgctxt "invoice"
+msgid "Products or services with a tax rate of {tax_rate} %"
+msgstr "Produkte oder Leistungen mit einem Steuersatz von {tax_rate} %"
+
+#: pretix_zugferd/invoice.py:216
+msgctxt "invoice"
+msgid ""
+"The detailed products and services are listed in the embedded human-readable "
+"invoice copy. The tax amounts in this invoice have been computed from gross "
+"prices. To represent this in ZUGFeRD format, all products and services of "
+"the same tax rate have been summarized in one line, in compliance with the "
+"circular published by the German Federal Ministry of Finance (BMF) on 15 "
+"October 2026. "
+msgstr ""
+"Die detaillierten Produkte und Leistungen sind der menschenlesbbaren "
+"eingebetteten Anlage zu entnehmen. Die Steuerbeträge in dieser Rechnung "
+"wurden vom Bruttopreis berechnet. Um dies im ZUGFeRD-Format abzubilden "
+"wurden alle Produkte und Leistungen des selben Steuersatzes in einer Zeile "
+"zusammengefasst, in Übereinstimmung mit dem BMF-Rundschreiben vom 15. "
+"Oktober 2026."
+
+#: pretix_zugferd/invoice.py:242
+msgctxt "invoice"
+msgid "Human-readable invoice with detailed list of products and services"
+msgstr ""
+"Menschenlesbare Rechnung mit detaillierter Aufstellung der Produkte und "
+"Leistungen"
+
+#: pretix_zugferd/invoice.py:367
 #, python-brace-format
 msgid "Order code: {code}"
 msgstr "Bestellnummer: {code}"
 
-#: pretix_zugferd/invoice.py:242
+#: pretix_zugferd/invoice.py:375
 #, python-brace-format
 msgctxt "invoice"
 msgid ""
@@ -46,13 +86,13 @@ msgstr ""
 "{from_date}\n"
 "bis {to_date}"
 
-#: pretix_zugferd/invoice.py:262
+#: pretix_zugferd/invoice.py:403
 #, python-brace-format
 msgctxt "invoice"
 msgid "Customer reference: {reference}"
 msgstr "Kundenseitige Referenz: {reference}"
 
-#: pretix_zugferd/invoice.py:382
+#: pretix_zugferd/invoice.py:545
 msgid "eInvoice included"
 msgstr "E-Rechnung enthalten"
 
@@ -134,8 +174,10 @@ msgstr "ZUGFeRD-Rechnungen können nicht erstellt werden."
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:240
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:257
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:265
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:283
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:292
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:286
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:295
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:310
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:319
 msgid "Change"
 msgstr "Ändern"
 
@@ -171,7 +213,8 @@ msgstr "Kein Land ist für die Absenderadresse der Rechnung gesetzt."
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:219
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:244
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:269
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:296
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:278
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:323
 msgid "Configuration is set."
 msgstr "Konfiguration ist gesetzt."
 
@@ -337,29 +380,67 @@ msgstr ""
 "\"zusätzliche Empfängerfeld\" für die Leitweg-ID zu verwenden."
 
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:274
+msgid "Rounding"
+msgstr "Rundung"
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:281
+msgid "Taxes are rounded by gross price."
+msgstr "Steuern werden aus Bruttopreisen berechnet."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:282
+msgid ""
+"This is explicitly permitted by the German Ministry of Finance (BMF) until "
+"the end of 2027 through their letter from 15 October 2026."
+msgstr ""
+"Dies ist nach einem Rundschreiben des BMF vom 15. Oktober 2026 explizit "
+"übergangsweise bis Ende 2027 erlaubt."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:283
+msgid ""
+"It might, however, cause issues in other countries or with recipients who "
+"have not updated their validation logic to allow small rounding differences."
+msgstr ""
+"Es kann jedoch Probleme in anderen Ländern oder mit Empfängern verursachen, "
+"deren Validierungslogik nicht angepasst wurde, um kleine Rundungsdifferenzen "
+"zu erlauben."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:290
+msgid "Taxes are rounded line by line."
+msgstr "Steuern werden zeilenweise berechnet."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:291
+msgid "This can cause invoices to be rejected as invalid by recipients."
+msgstr ""
+"Dies kann dazu führen, dass Rechnungen als ungültig zurück gewiesen werden."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:292
+msgid "Please configure taxes to be rounded based on net total."
+msgstr "Bitte konfiguriere die Rundung basierend auf dem Nettobetrag."
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:301
 msgid "Tax rules"
 msgstr "Steuer-Regeln"
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:278
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:305
 msgid "Not all products use a tax rule."
 msgstr "Nicht alle Produkte verwenden eine Steuer-Regel."
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:279
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:288
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:306
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:315
 msgid "pretix will need to guess the correct tax handling for your invoice."
 msgstr "pretix muss die korrekte Steuerbezeichnung für deine Rechnung raten."
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:280
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:307
 msgid "Please configure explicit tax rules to avoid incorrect invoices."
 msgstr ""
 "Bitte konfiguriere explizite Steuer-Regeln, um falsche Rechnungen zu "
 "vermeiden."
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:287
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:314
 msgid "Not all tax rule have a tax code set."
 msgstr "Nicht alle Steuerregeln haben eine Steuerkodierung."
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:289
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:316
 msgid ""
 "Please configure a tax code for every tax rule including all custom rules to "
 "avoid incorrect invoices."
@@ -367,11 +448,11 @@ msgstr ""
 "Bitte konfiguriere eine Steuerkodierung für alle Steuerregeln inkl. "
 "individueller Regeln, um falsche Rechnungen zu vermeiden."
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:303
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:330
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:310
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:337
 msgid "Save"
 msgstr "Speichern"
 
@@ -393,12 +474,11 @@ msgid "Seller contact phone number"
 msgstr "Verkäuferkontakt Telefonnummer"
 
 #: pretix_zugferd/views.py:30
-msgid "Include event date as delivery date"
-msgstr "Veranstaltungsdatum als Leistungsdatum ausweisen"
-
-#: pretix_zugferd/views.py:34
 msgid "Hide label that advertises the included XRechnung"
 msgstr "Label verstecken, das auf die enthaltene E-Rechnung hinweist."
+
+#~ msgid "Include event date as delivery date"
+#~ msgstr "Veranstaltungsdatum als Leistungsdatum ausweisen"
 
 #~ msgid ""
 #~ "Note: Use this plugin at your own risk. If there is a semantic difference "

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:41+0100\n"
+"POT-Creation-Date: 2026-11-25 17:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,17 +28,47 @@ msgid ""
 "ZUGFeRD data, a structured data format for invoices used in Germany."
 msgstr ""
 
-#: pretix_zugferd/invoice.py:93
+#: pretix_zugferd/invoice.py:150
 msgctxt "zugferd"
 msgid "See invoice notes for more information"
 msgstr ""
 
-#: pretix_zugferd/invoice.py:234
+#: pretix_zugferd/invoice.py:203
+#, python-brace-format
+msgctxt "invoice"
+msgid ""
+"Products or services with a tax rate of {tax_rate} % and exemption reason "
+"{reason}"
+msgstr ""
+
+#: pretix_zugferd/invoice.py:211
+#, python-brace-format
+msgctxt "invoice"
+msgid "Products or services with a tax rate of {tax_rate} %"
+msgstr ""
+
+#: pretix_zugferd/invoice.py:216
+msgctxt "invoice"
+msgid ""
+"The detailed products and services are listed in the embedded human-readable "
+"invoice copy. The tax amounts in this invoice have been computed from gross "
+"prices. To represent this in ZUGFeRD format, all products and services of "
+"the same tax rate have been summarized in one line, in compliance with the "
+"circular published by the German Federal Ministry of Finance (BMF) on 15 "
+"October 2026. "
+msgstr ""
+
+#: pretix_zugferd/invoice.py:242
+msgctxt "invoice"
+msgid "Human-readable invoice with detailed list of products and services"
+msgstr ""
+
+#: pretix_zugferd/invoice.py:367
 #, python-brace-format
 msgid "Order code: {code}"
 msgstr ""
 
-#: pretix_zugferd/invoice.py:242
+#: pretix_zugferd/invoice.py:375
 #, python-brace-format
 msgctxt "invoice"
 msgid ""
@@ -46,13 +76,13 @@ msgid ""
 "until {to_date}"
 msgstr ""
 
-#: pretix_zugferd/invoice.py:262
+#: pretix_zugferd/invoice.py:403
 #, python-brace-format
 msgctxt "invoice"
 msgid "Customer reference: {reference}"
 msgstr ""
 
-#: pretix_zugferd/invoice.py:382
+#: pretix_zugferd/invoice.py:545
 msgid "eInvoice included"
 msgstr ""
 
@@ -119,8 +149,10 @@ msgstr ""
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:240
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:257
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:265
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:283
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:292
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:286
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:295
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:310
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:319
 msgid "Change"
 msgstr ""
 
@@ -156,7 +188,8 @@ msgstr ""
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:219
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:244
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:269
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:296
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:278
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:323
 msgid "Configuration is set."
 msgstr ""
 
@@ -297,37 +330,69 @@ msgid ""
 msgstr ""
 
 #: pretix_zugferd/templates/pretix_zugferd/settings.html:274
+msgid "Rounding"
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:281
+msgid "Taxes are rounded by gross price."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:282
+msgid ""
+"This is explicitly permitted by the German Ministry of Finance (BMF) until "
+"the end of 2027 through their letter from 15 October 2026."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:283
+msgid ""
+"It might, however, cause issues in other countries or with recipients who "
+"have not updated their validation logic to allow small rounding differences."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:290
+msgid "Taxes are rounded line by line."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:291
+msgid "This can cause invoices to be rejected as invalid by recipients."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:292
+msgid "Please configure taxes to be rounded based on net total."
+msgstr ""
+
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:301
 msgid "Tax rules"
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:278
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:305
 msgid "Not all products use a tax rule."
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:279
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:288
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:306
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:315
 msgid "pretix will need to guess the correct tax handling for your invoice."
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:280
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:307
 msgid "Please configure explicit tax rules to avoid incorrect invoices."
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:287
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:314
 msgid "Not all tax rule have a tax code set."
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:289
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:316
 msgid ""
 "Please configure a tax code for every tax rule including all custom rules to "
 "avoid incorrect invoices."
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:303
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:330
 msgid "Settings"
 msgstr ""
 
-#: pretix_zugferd/templates/pretix_zugferd/settings.html:310
+#: pretix_zugferd/templates/pretix_zugferd/settings.html:337
 msgid "Save"
 msgstr ""
 
@@ -349,9 +414,5 @@ msgid "Seller contact phone number"
 msgstr ""
 
 #: pretix_zugferd/views.py:30
-msgid "Include event date as delivery date"
-msgstr ""
-
-#: pretix_zugferd/views.py:34
 msgid "Hide label that advertises the included XRechnung"
 msgstr ""
